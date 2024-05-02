@@ -1,9 +1,14 @@
 package com.example.miProyecto.model;
 
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 @Entity
 public class University {
@@ -17,7 +22,7 @@ public class University {
 	private String address;
 	private String phoneNumber;
 	private String email; 
-	private String specialization; 
+	private String specialization;  
 	private boolean scholarship; 
 	
 	private boolean scholarships = false;
@@ -35,8 +40,22 @@ public class University {
 		this.specialization = specialization;
 		this.scholarship = scholarship;
 	}
+	
+	 @ManyToMany
+	    @JoinTable(
+	        name = "university_category",
+	        joinColumns = @JoinColumn(name = "university_id"),
+	        inverseJoinColumns = @JoinColumn(name = "category_id")
+	    )
+	    private Set<Category> categories;
 
-	// Getters y setters
+	    @ManyToMany
+	    @JoinTable(
+	        name = "university_location",
+	        joinColumns = @JoinColumn(name = "university_id"),
+	        inverseJoinColumns = @JoinColumn(name = "location_id")
+	    )
+
 	public Long getId() {
 		return id;
 	}

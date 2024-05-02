@@ -11,32 +11,35 @@ import com.example.miProyecto.repository.UniversityRepository;
 
 @Service
 public class UniversityService {
-    @Autowired
-    private UniversityRepository universityRepository;
+	@Autowired
+	private UniversityRepository universityRepository; // Elimina la palabra clave static aquí
 
-    public University saveUniversity(University university) {
-        return universityRepository.save(university);
-    }
+	public University saveUniversity(University university) {
+		return universityRepository.save(university);
+	}
 
-    public List<University> getAllUniversities() {
-        return universityRepository.findAll();
-    }
+	public List<University> getAllUniversities() {
+		return universityRepository.findAll();
+	}
 
-    public Optional<University> getUniversityById(Long id) {
-        return universityRepository.findById(id);
-    }
+	public Optional<University> getUniversityById(Long id) {
+		return universityRepository.findById(id);
+	}
 
-    public boolean deleteUniversity(Long id) {
-        if (universityRepository.existsById(id)) {
-            universityRepository.deleteById(id);
-            return true;
-        } else {
-            return false;
-        }
-    }
+	public boolean deleteUniversity(Long id) {
+		if (universityRepository.existsById(id)) {
+			universityRepository.deleteById(id);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    public List<University> getUniversitiesByCategory(String category) {
-        return universityRepository.findBySpecialization(category);
-    }
+	public List<University> getUniversitiesByCategory(String category) {
+		return universityRepository.findBySpecialization(category);
+	}
+
+	public List<University> getUniversitiesByLocation(String location) {
+		return universityRepository.findByLocation(location);
+	}
 }
-
