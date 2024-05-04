@@ -32,14 +32,14 @@ public class DataLoader implements CommandLineRunner {
 
 	private void loadCategories() {
 		if (categoryRepository.count() == 0) {
-			Category engineeringCategory = new Category("Ingenieria");
-			Category artsCategory = new Category("Arte");
-			Category healthCategory = new Category("Salud");
-			Category sciencesCategory = new Category("Ciencias");
-			Category humanitiesCategory = new Category("Letras");
+			Category ingenieriaCategory = new Category("Ingenieria");
+			Category arteCategory = new Category("Arte");
+			Category saludCategory = new Category("Salud");
+			Category cienciasCategory = new Category("Ciencias");
+			Category humanidadesCategory = new Category("Letras");
 
 			categoryRepository.saveAll(
-					List.of(engineeringCategory, artsCategory, healthCategory, sciencesCategory, humanitiesCategory));
+					List.of(ingenieriaCategory, arteCategory, saludCategory, cienciasCategory, humanidadesCategory));
 		}
 	}
 
@@ -47,12 +47,12 @@ public class DataLoader implements CommandLineRunner {
 		if (locationRepository.count() == 0) {
 			Location madridLocation = new Location("Madrid");
 			Location barcelonaLocation = new Location("Barcelona");
-			Location sevilleLocation = new Location("Sevilla");
+			Location sevillaLocation = new Location("Sevilla");
 			Location valenciaLocation = new Location("Valencia");
 			Location malagaLocation = new Location("Malaga");
 
 			locationRepository.saveAll(
-					List.of(madridLocation, barcelonaLocation, sevilleLocation, valenciaLocation, malagaLocation));
+					List.of(madridLocation, barcelonaLocation, sevillaLocation, valenciaLocation, malagaLocation));
 		}
 	}
 }

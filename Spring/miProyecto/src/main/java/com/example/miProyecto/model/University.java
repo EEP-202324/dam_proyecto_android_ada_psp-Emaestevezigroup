@@ -1,14 +1,11 @@
 package com.example.miProyecto.model;
 
-import java.util.Set;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class University {
@@ -18,43 +15,34 @@ public class University {
 	private Long id;
 
 	private String name;
-	private String location; 
 	private String address;
 	private String phoneNumber;
-	private String email; 
-	private String specialization;  
-	private boolean scholarship; 
-	
-	private boolean scholarships = false;
+	private String email;
+	private String specialization;
+	private boolean scholarship;
+
+	@ManyToOne
+	@JoinColumn(name = "category_id")
+	private Category category;
+
+	@ManyToOne
+	@JoinColumn(name = "location_id")
+	private Location location;
 
 	public University() {
 	}
 
-	public University(String name, String location, String address, String phoneNumber, String email,
-			String specialization, boolean scholarship) {
+	public University(String name, String address, String phoneNumber, String email, String specialization,
+			boolean scholarship, Category category, Location location) {
 		this.name = name;
-		this.location = location;
 		this.address = address;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
 		this.specialization = specialization;
 		this.scholarship = scholarship;
+		this.category = category;
+		this.location = location;
 	}
-	
-	 @ManyToMany
-	    @JoinTable(
-	        name = "university_category",
-	        joinColumns = @JoinColumn(name = "university_id"),
-	        inverseJoinColumns = @JoinColumn(name = "category_id")
-	    )
-	    private Set<Category> categories;
-
-	    @ManyToMany
-	    @JoinTable(
-	        name = "university_location",
-	        joinColumns = @JoinColumn(name = "university_id"),
-	        inverseJoinColumns = @JoinColumn(name = "location_id")
-	    )
 
 	public Long getId() {
 		return id;
@@ -70,14 +58,6 @@ public class University {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
 	}
 
 	public String getAddress() {
@@ -118,5 +98,21 @@ public class University {
 
 	public void setScholarship(boolean scholarship) {
 		this.scholarship = scholarship;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	public Location getLocation() {
+		return location;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
 	}
 }
