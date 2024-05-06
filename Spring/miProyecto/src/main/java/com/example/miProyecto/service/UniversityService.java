@@ -6,13 +6,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.miProyecto.model.Category;
+import com.example.miProyecto.model.Location;
 import com.example.miProyecto.model.University;
 import com.example.miProyecto.repository.UniversityRepository;
 
 @Service
 public class UniversityService {
 	@Autowired
-	private UniversityRepository universityRepository; // Elimina la palabra clave static aquí
+	private UniversityRepository universityRepository; 
 
 	public University saveUniversity(University university) {
 		return universityRepository.save(university);
@@ -35,11 +37,11 @@ public class UniversityService {
 		}
 	}
 
-	public List<University> getUniversitiesByCategory(String category) {
+	public List<University> getUniversitiesByCategory(Category category) {
 		return universityRepository.findBySpecialization(category);
 	}
 
-	public List<University> getUniversitiesByLocation(String location) {
+	public List<University> getUniversitiesByLocation(Location location) {
 		return universityRepository.findByLocation(location);
 	}
 }
