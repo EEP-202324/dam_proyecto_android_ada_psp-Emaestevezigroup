@@ -32,8 +32,8 @@ public class UniversityControllerTests {
     @Test
     public void testGetAllUniversitiesWhenDatabaseNotEmpty() {
         if (universityRepository.findAll().isEmpty()) {
-            University testUniversity1 = new University("Test University 1", "Test Location 1", "Test Address 1", "123456789", "test1@example.com", "Test Specialization 1", true);
-            University testUniversity2 = new University("Test University 2", "Test Location 2", "Test Address 2", "987654321", "test2@example.com", "Test Specialization 2", false);
+            University testUniversity1 = new University("Nombre 1", "Test Address 1", "123456789", "test1@example.com", true, "Categoria 1", "Test Location 1";
+            University testUniversity2 = new University("Nombre 2", "Test Address 2", "123456789", "test1@example.com", true, "Categoria 2", "Test Location 2";;
             universityRepository.save(testUniversity1);
             universityRepository.save(testUniversity2);
         }
