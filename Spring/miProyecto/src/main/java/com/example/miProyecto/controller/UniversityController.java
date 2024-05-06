@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.miProyecto.exception.ResourceNotFoundException;
+import com.example.miProyecto.model.Category;
+import com.example.miProyecto.model.Location;
 import com.example.miProyecto.model.University;
 import com.example.miProyecto.repository.UniversityRepository;
 import com.example.miProyecto.service.UniversityService;
@@ -55,12 +57,12 @@ public class UniversityController {
 	}
 
 	 @GetMapping("/byLocation")
-	    public List<University> getUniversitiesByLocation(@RequestParam String location) {
+	    public List<University> getUniversitiesByLocation(@RequestParam Location location) {
 	        return universityService.getUniversitiesByLocation(location);
 	    }
 	 
 	 @GetMapping("/byCategory")
-	    public List<University> getUniversitiesByCategory(@RequestParam String category) {
+	    public List<University> getUniversitiesByCategory(@RequestParam Category category) {
 	        return universityService.getUniversitiesByCategory(category);
 	    }
 	 
