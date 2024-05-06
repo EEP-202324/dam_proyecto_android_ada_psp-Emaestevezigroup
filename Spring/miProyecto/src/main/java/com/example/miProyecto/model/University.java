@@ -32,17 +32,16 @@ public class University {
 	public University() {
 	}
 
-	public University(String name, String address, String phoneNumber, String email, String specialization,
-			boolean scholarship, Category category, Location location) {
-		this.name = name;
-		this.address = address;
-		this.phoneNumber = phoneNumber;
-		this.email = email;
-		this.specialization = specialization;
-		this.scholarship = scholarship;
-		this.category = category;
-		this.location = location;
+	public University(String name, String address, String phoneNumber, String email, boolean scholarship, Category category, Location location) {
+	    this.name = name;
+	    this.address = address;
+	    this.phoneNumber = phoneNumber;
+	    this.email = email;
+	    this.scholarship = scholarship;
+	    this.category = category;
+	    this.location = location;
 	}
+
 
 	public Long getId() {
 		return id;
@@ -82,14 +81,6 @@ public class University {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	public String getSpecialization() {
-		return specialization;
-	}
-
-	public void setSpecialization(String specialization) {
-		this.specialization = specialization;
 	}
 
 	public boolean isScholarship() {
