@@ -18,7 +18,6 @@ public class University {
 	private String address;
 	private String phoneNumber;
 	private String email;
-	private String specialization;
 	private boolean scholarship;
 
 	@ManyToOne
