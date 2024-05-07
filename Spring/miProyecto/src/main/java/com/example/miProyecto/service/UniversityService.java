@@ -38,7 +38,7 @@ public class UniversityService {
 	}
 
 	public List<University> getUniversitiesByCategory(Category category) {
-		return universityRepository.findBySpecialization(category);
+		return universityRepository.findByCategory(category);
 	}
 
 	public List<University> getUniversitiesByLocation(Location location) {
