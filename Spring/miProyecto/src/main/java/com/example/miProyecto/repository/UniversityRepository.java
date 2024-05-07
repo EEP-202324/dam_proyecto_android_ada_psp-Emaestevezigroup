@@ -11,5 +11,5 @@ import com.example.miProyecto.model.University;
 public interface UniversityRepository extends JpaRepository<University, Long> {
 	List<University> findByLocation(Location location);
 
-	List<University> findBySpecialization(Category category);
+	List<University> findByCategory(Category category);
 }
