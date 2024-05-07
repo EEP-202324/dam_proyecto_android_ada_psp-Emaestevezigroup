@@ -1,5 +1,6 @@
 package com.example.miProyecto.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class DataLoader implements CommandLineRunner {
 	private final CategoryRepository categoryRepository;
 	private final LocationRepository locationRepository;
 
+	private List<Category> loadedCategories = new ArrayList<>();
+	private List<Location> loadedLocations = new ArrayList<>();
+
 	@Autowired
 	public DataLoader(CategoryRepository categoryRepository, LocationRepository locationRepository) {
 		this.categoryRepository = categoryRepository;
@@ -26,7 +30,6 @@ public class DataLoader implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		loadCategories();
-
 		loadLocations();
 	}
 
@@ -38,7 +41,7 @@ public class DataLoader implements CommandLineRunner {
 			Category cienciasCategory = new Category("Ciencias");
 			Category humanidadesCategory = new Category("Letras");
 
-			categoryRepository.saveAll(
+			loadedCategories = categoryRepository.saveAll(
 					List.of(ingenieriaCategory, arteCategory, saludCategory, cienciasCategory, humanidadesCategory));
 		}
 	}
@@ -51,8 +54,16 @@ public class DataLoader implements CommandLineRunner {
 			Location valenciaLocation = new Location("Valencia");
 			Location malagaLocation = new Location("Malaga");
 
-			locationRepository.saveAll(
+			loadedLocations = locationRepository.saveAll(
 					List.of(madridLocation, barcelonaLocation, sevillaLocation, valenciaLocation, malagaLocation));
 		}
+	}
+
+	public List<Category> getLoadedCategories() {
+		return loadedCategories;
+	}
+
+	public List<Location> getLoadedLocations() {
+		return loadedLocations;
 	}
 }
