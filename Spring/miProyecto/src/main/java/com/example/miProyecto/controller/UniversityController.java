@@ -1,6 +1,7 @@
 package com.example.miProyecto.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -74,24 +75,35 @@ public class UniversityController {
 	 
 
 		@PutMapping("/{id}")
-		public University updateUniversity(@PathVariable Long id, @RequestBody University universityDetails) {
-			University university = universityRepository.findById(id)
-					.orElseThrow(() -> new ResourceNotFoundException("University not found with id " + id));
+		public ResponseEntity<University> updateUniversity(@PathVariable Long id, @RequestBody University universityDetails) {
+		    Optional<University> optionalUniversity = universityRepository.findById(id);
+		    if (optionalUniversity.isPresent()) {
+		        University university = optionalUniversity.get();
+		        university.setName(universityDetails.getName());
+		        university.setLocation(universityDetails.getLocation());
+		        university.setScholarship(universityDetails.isScholarship());
 
-			university.setName(universityDetails.getName());
-			university.setLocation(universityDetails.getLocation());
-			university.setScholarship(universityDetails.isScholarship());
-
-			return universityRepository.save(university);
+		        University updatedUniversity = universityRepository.save(university);
+		        return ResponseEntity.ok(updatedUniversity);
+		    } else {
+		        return ResponseEntity.notFound().build();
+		    }
 		}
+
+
 	 
-	 @DeleteMapping("/{id}")
+		@DeleteMapping("/{id}")
 		public ResponseEntity<?> deleteUniversity(@PathVariable Long id) {
-			University university = universityRepository.findById(id)
-					.orElseThrow(() -> new ResourceNotFoundException("University not found with id " + id));
-
-			universityRepository.delete(university);
-
-			return ResponseEntity.ok().build();
+		    Optional<University> optionalUniversity = universityRepository.findById(id);
+		    if (optionalUniversity.isPresent()) {
+		        University university = optionalUniversity.get();
+		        universityRepository.delete(university);
+		        return ResponseEntity.ok().build();
+		    } else {
+		        return ResponseEntity.notFound().build();
+		    }
 		}
+
+
+
 }
