@@ -1,123 +1,177 @@
 package com.example.miProyecto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.example.miProyecto.controller.UniversityController;
+import com.example.miProyecto.exception.ResourceNotFoundException;
+import com.example.miProyecto.model.Category;
+import com.example.miProyecto.model.Location;
 import com.example.miProyecto.model.University;
 import com.example.miProyecto.repository.UniversityRepository;
+import com.example.miProyecto.service.UniversityService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
 public class UniversityControllerTests {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
+    @Mock
     private UniversityRepository universityRepository;
 
-    @Test
-    public void testGetAllUniversitiesWhenDatabaseNotEmpty() {
-        if (universityRepository.findAll().isEmpty()) {
-            University testUniversity1 = new University("Nombre 1", "Test Address 1", "123456789", "test1@example.com", true, "Categoria 1", "Test Location 1";
-            University testUniversity2 = new University("Nombre 2", "Test Address 2", "123456789", "test1@example.com", true, "Categoria 2", "Test Location 2";;
-            universityRepository.save(testUniversity1);
-            universityRepository.save(testUniversity2);
-        }
+    @Mock
+    private UniversityService universityService;
 
-        ResponseEntity<University[]> responseEntity = restTemplate.getForEntity("/universities", University[].class);
+    @InjectMocks
+    private UniversityController universityController;
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        University[] universities = responseEntity.getBody();
-        assertThat(universities).isNotEmpty();
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testGetAllUniversitiesWhenDatabaseEmpty() {
-        universityRepository.deleteAll();
+    public void testGetAllUniversities() {
+        List<University> universities = new ArrayList<>();
+        universities.add(new University("University A", "Address A", "123456", "email@example.com", true, new Category("Category A"), new Location("Location A")));
+        universities.add(new University("University B", "Address B", "789012", "email@example.com", false, new Category("Category B"), new Location("Location B")));
+        PageImpl<University> page = new PageImpl<>(universities);
 
-        ResponseEntity<University[]> responseEntity = restTemplate.getForEntity("/universities", University[].class);
+        when(universityRepository.findAll(any(PageRequest.class))).thenReturn(page);
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<List<University>> response = universityController.getAllUniversities(PageRequest.of(0, 10));
+        List<University> result = response.getBody();
 
-        University[] universities = responseEntity.getBody();
-        assertThat(universities).isEmpty();
+        assertEquals(2, result.size());
     }
 
     @Test
-    public void testCreateUniversityWithScholarshipTrue() {
-        University university = new University("Test University", "Test Location", "Test Address", "123456789", "test@example.com", "Test Specialization", true);
+    public void testGetUniversityById() {
+        Long id = 1L;
+        University university = new University();
+        university.setId(id);
 
-        ResponseEntity<University> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/universities", university, University.class);
+        when(universityRepository.findById(id)).thenReturn(Optional.of(university));
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<University> response = universityController.getUniversityById(id);
 
-        University createdUniversity = responseEntity.getBody();
-        assertThat(createdUniversity.getId()).isNotNull();
-        assertEquals(university.getName(), createdUniversity.getName());
-        assertEquals(university.getLocation(), createdUniversity.getLocation());
-        assertEquals(university.isScholarship(), createdUniversity.isScholarship());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(university, response.getBody());
     }
 
     @Test
-    public void testCreateUniversityWithScholarshipFalse() {
-        University university = new University("Test University", "Test Location", "Test Address", "123456789", "test@example.com", "Test Specialization", false);
+    public void testGetUniversityById_NotFound() {
+        Long id = 1L;
 
-        ResponseEntity<University> responseEntity = restTemplate.postForEntity("http://localhost:" + port + "/universities", university, University.class);
+        when(universityRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<University> response = universityController.getUniversityById(id);
 
-        University createdUniversity = responseEntity.getBody();
-        assertThat(createdUniversity.getId()).isNotNull();
-        assertEquals(university.getName(), createdUniversity.getName());
-        assertEquals(university.getLocation(), createdUniversity.getLocation());
-        assertEquals(university.isScholarship(), createdUniversity.isScholarship());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
     }
 
     @Test
-    public void testUpdateUniversitySuccessful() {
-        University existingUniversity = universityRepository.findAll().get(0);
-        existingUniversity.setName("Updated University Name");
-        restTemplate.put("http://localhost:" + port + "/universities/" + existingUniversity.getId(), existingUniversity);
-        University updatedUniversity = universityRepository.findById(existingUniversity.getId()).orElse(null);
-        assertThat(updatedUniversity).isNotNull();
-        assertEquals(existingUniversity.getName(), updatedUniversity.getName());
+    public void testCreateUniversity() {
+        University university = new University();
+        university.setName("Test University");
+
+        when(universityRepository.save(any())).thenReturn(university);
+
+        University createdUniversity = universityController.createUniversity(university);
+
+        assertEquals("Test University", createdUniversity.getName());
     }
 
     @Test
-    public void testUpdateNonExistingUniversity() {
-        University nonExistingUniversity = new University("Non Existing University", "Test Location", "Test Address", "123456789", "test@example.com", "Test Specialization", false);
+    public void testCreateUniversity_Error() {
+        University university = new University();
+        university.setName("Test University");
 
-        restTemplate.put("http://localhost:" + port + "/universities/1000", nonExistingUniversity);
+        when(universityRepository.save(any())).thenThrow(new RuntimeException("Error saving university"));
 
-        assertTrue(universityRepository.findById(1000L).isEmpty());
+        assertThrows(RuntimeException.class, () -> universityController.createUniversity(university));
     }
 
     @Test
-    public void testDeleteUniversitySuccessful() {
-        University existingUniversity = universityRepository.findAll().get(0);
-        restTemplate.delete("http://localhost:" + port + "/universities/" + existingUniversity.getId());
-        assertTrue(universityRepository.findById(existingUniversity.getId()).isEmpty());
+    public void testUpdateUniversity() {
+        Long id = 1L;
+        University existingUniversity = new University();
+        existingUniversity.setId(id);
+        existingUniversity.setName("Existing University");
+
+        University updatedUniversity = new University();
+        updatedUniversity.setId(id);
+        updatedUniversity.setName("Updated University");
+
+        when(universityRepository.findById(id)).thenReturn(Optional.of(existingUniversity));
+        when(universityRepository.save(any())).thenReturn(updatedUniversity);
+
+        ResponseEntity<University> result = universityController.updateUniversity(id, updatedUniversity);
+        University resultUniversity = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(updatedUniversity, resultUniversity);
+    }
+
+
+    @Test
+    public void testUpdateUniversity_NotFound() {
+        Long id = 1L;
+        University updatedUniversity = new University();
+        updatedUniversity.setId(id);
+        updatedUniversity.setName("Updated University");
+
+        when(universityRepository.findById(id)).thenReturn(Optional.empty());
+
+        ResponseEntity<University> response = universityController.updateUniversity(id, updatedUniversity);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+
+
+
+    @Test
+    public void testDeleteUniversity() {
+        Long id = 1L;
+        University university = new University();
+        university.setId(id);
+
+        when(universityRepository.findById(id)).thenReturn(Optional.of(university));
+
+        ResponseEntity<?> response = universityController.deleteUniversity(id);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(universityRepository, times(1)).delete(university);
     }
 
     @Test
-    public void testDeleteNonExistingUniversity() {
-        restTemplate.delete("http://localhost:" + port + "/universities/1000");
+    public void testDeleteUniversity_NotFound() {
+        Long id = 1L;
 
-        assertTrue(universityRepository.findById(1000L).isEmpty());
+        when(universityRepository.findById(id)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = universityController.deleteUniversity(id);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody()); 
+        verify(universityRepository, never()).delete(any());
     }
+
+
+
+
 }
