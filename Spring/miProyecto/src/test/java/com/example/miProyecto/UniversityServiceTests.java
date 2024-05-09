@@ -34,14 +34,14 @@ public class UniversityServiceTests {
 
     @Test
     public void testGetUniversitiesByLocation() {
-        Location location = new Location("Location A");
+        Long locationId = 1L;
         List<University> universities = new ArrayList<>();
-        universities.add(new University("University A", "Address A", "123456", "email@example.com", true, new Category("Category A"), location));
-        universities.add(new University("University B", "Address B", "789012", "email@example.com", false, new Category("Category B"), location));
+        universities.add(new University("University A", "Address A", "123456", "email@example.com", true, new Category("Category A"), new Location("Location A")));
+        universities.add(new University("University B", "Address B", "789012", "email@example.com", false, new Category("Category B"), new Location("Location B")));
 
-        when(universityRepository.findByLocation(location)).thenReturn(universities);
+        when(universityRepository.findByLocationId(locationId)).thenReturn(universities);
 
-        List<University> result = universityService.getUniversitiesByLocation(location);
+        List<University> result = universityService.getUniversitiesByLocation(locationId);
 
         assertEquals(2, result.size());
         assertEquals("University A", result.get(0).getName());
@@ -50,19 +50,20 @@ public class UniversityServiceTests {
 
     @Test
     public void testGetUniversitiesByCategory() {
-        Category category = new Category("Category A");
+        Long categoryId = 1L;
         List<University> universities = new ArrayList<>();
-        universities.add(new University("University A", "Address A", "123456", "email@example.com", true, category, new Location("Location A")));
-        universities.add(new University("University B", "Address B", "789012", "email@example.com", false, category, new Location("Location B")));
+        universities.add(new University("University A", "Address A", "123456", "email@example.com", true, new Category("Category A"), new Location("Location A")));
+        universities.add(new University("University B", "Address B", "789012", "email@example.com", false, new Category("Category A"), new Location("Location B")));
 
-        when(universityRepository.findByCategory(category)).thenReturn(universities);
+        when(universityRepository.findByCategoryId(categoryId)).thenReturn(universities);
 
-        List<University> result = universityService.getUniversitiesByCategory(category);
+        List<University> result = universityService.getUniversitiesByCategory(categoryId);
 
         assertEquals(2, result.size());
         assertEquals("University A", result.get(0).getName());
         assertEquals("University B", result.get(1).getName());
     }
+
 
     @Test
     public void testGetUniversityById() {

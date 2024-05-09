@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,9 @@ import com.example.miProyecto.model.Location;
 import com.example.miProyecto.model.University;
 import com.example.miProyecto.repository.UniversityRepository;
 import com.example.miProyecto.service.UniversityService;
+
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/universities")
@@ -57,21 +61,36 @@ public class UniversityController {
 		}
 	}
 
-	 @GetMapping("/byLocation")
-	    public List<University> getUniversitiesByLocation(@RequestParam Location location) {
-	        return universityService.getUniversitiesByLocation(location);
+	 @GetMapping("/byLocation/{id}")
+	    public List<University> getUniversitiesByLocation(@PathVariable Long id) {
+	        return universityService.getUniversitiesByLocation(id);
 	    }
 	 
-	 @GetMapping("/byCategory")
-	    public List<University> getUniversitiesByCategory(@RequestParam Category category) {
-	        return universityService.getUniversitiesByCategory(category);
+	 @GetMapping("/byCategory/{id}")
+	    public List<University> getUniversitiesByCategory(@PathVariable Long id) {
+	        return universityService.getUniversitiesByCategory(id);
 	    }
 	 
 
-		@PostMapping
-		public University createUniversity(@RequestBody University university) {
-			return universityRepository.save(university);
-		}
+	    @PostMapping
+	    public ResponseEntity<?> createUniversity(@Valid @RequestBody University university, BindingResult bindingResult) {
+	        if (bindingResult.hasErrors()) {
+	            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+	        }
+	        
+	        String phoneNumber = university.getPhoneNumber();
+	        if (phoneNumber != null && phoneNumber.length() != 9) {
+	            return ResponseEntity.badRequest().body("El número de teléfono debe tener 9 dígitos");
+	        }
+	        
+	        String email = university.getEmail();
+	        if (!isValidEmail(email)) {
+	            return ResponseEntity.badRequest().body("El email debe tener @ y .extensión");
+	        }
+
+	        University createdUniversity = universityRepository.save(university);
+	        return ResponseEntity.ok(createdUniversity);
+	    }
 	 
 
 		@PutMapping("/{id}")
@@ -104,6 +123,9 @@ public class UniversityController {
 		    }
 		}
 
+		private boolean isValidEmail(String email) {
+	        return email != null && email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+	    }
 
 
 }

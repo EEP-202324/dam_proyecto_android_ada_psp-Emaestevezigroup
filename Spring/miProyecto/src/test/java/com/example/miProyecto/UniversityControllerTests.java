@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult; // Importa BindingResult de la ubicación correcta
 
 import com.example.miProyecto.controller.UniversityController;
 import com.example.miProyecto.exception.ResourceNotFoundException;
@@ -86,22 +87,24 @@ public class UniversityControllerTests {
     public void testCreateUniversity() {
         University university = new University();
         university.setName("Test University");
+        university.setPhoneNumber("123456789");
 
         when(universityRepository.save(any())).thenReturn(university);
 
-        University createdUniversity = universityController.createUniversity(university);
+        ResponseEntity<?> response = universityController.createUniversity(university, mock(BindingResult.class));
 
-        assertEquals("Test University", createdUniversity.getName());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
     public void testCreateUniversity_Error() {
         University university = new University();
         university.setName("Test University");
+        university.setPhoneNumber("123");
 
-        when(universityRepository.save(any())).thenThrow(new RuntimeException("Error saving university"));
+        ResponseEntity<?> response = universityController.createUniversity(university, mock(BindingResult.class));
 
-        assertThrows(RuntimeException.class, () -> universityController.createUniversity(university));
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -170,8 +173,5 @@ public class UniversityControllerTests {
         assertNull(response.getBody()); 
         verify(universityRepository, never()).delete(any());
     }
-
-
-
 
 }
