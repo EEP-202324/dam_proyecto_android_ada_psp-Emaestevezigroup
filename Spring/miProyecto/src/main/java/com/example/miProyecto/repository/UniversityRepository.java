@@ -9,7 +9,7 @@ import com.example.miProyecto.model.Location;
 import com.example.miProyecto.model.University;
 
 public interface UniversityRepository extends JpaRepository<University, Long> {
-	List<University> findByLocation(Location location);
+	List<University> findByLocationId(Long locationId);
 
-	List<University> findByCategory(Category category);
+	List<University> findByCategoryId(Long categoryId);
 }

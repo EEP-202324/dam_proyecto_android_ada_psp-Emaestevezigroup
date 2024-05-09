@@ -17,6 +17,9 @@ public class UniversityService {
 	private UniversityRepository universityRepository; 
 
 	public University saveUniversity(University university) {
+		if (university.getPhoneNumber().length() != 9) {
+			throw new IllegalArgumentException("El número de teléfono debe tener exactamente 9 cifras.");
+		}
 		return universityRepository.save(university);
 	}
 
@@ -37,11 +40,11 @@ public class UniversityService {
 		}
 	}
 
-	public List<University> getUniversitiesByCategory(Category category) {
-		return universityRepository.findByCategory(category);
+	public List<University> getUniversitiesByCategory(Long categoryId) {
+		return universityRepository.findByCategoryId(categoryId);
 	}
 
-	public List<University> getUniversitiesByLocation(Location location) {
-		return universityRepository.findByLocation(location);
+	public List<University> getUniversitiesByLocation(Long locationId) {
+		return universityRepository.findByLocationId(locationId);
 	}
 }
