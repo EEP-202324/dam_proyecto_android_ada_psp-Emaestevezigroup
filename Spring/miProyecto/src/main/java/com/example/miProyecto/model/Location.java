@@ -14,6 +14,10 @@ public class Location {
 
 	private String name;
 
+	public Location() {
+
+	}
+
 	public Location(String name) {
 		super();
 		this.name = name;
