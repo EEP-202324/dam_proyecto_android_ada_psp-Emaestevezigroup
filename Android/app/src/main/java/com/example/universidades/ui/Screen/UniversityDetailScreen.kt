@@ -1,4 +1,4 @@
-package com.example.universidades.ui.Screen
+package com.example.universidades.ui.screen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text

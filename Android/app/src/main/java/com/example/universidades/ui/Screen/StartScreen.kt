@@ -1,4 +1,4 @@
-package com.example.universidades.ui.Screen
+package com.example.universidades.ui.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
