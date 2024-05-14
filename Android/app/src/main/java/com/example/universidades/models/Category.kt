@@ -1,6 +1,8 @@
 package com.example.universidades.models
 
+import com.google.gson.annotations.SerializedName
+
 data class Category (
-    val id: Long,
-    val name: String
+    @SerializedName("id") val id: Long,
+    @SerializedName("name") val name: String
 )

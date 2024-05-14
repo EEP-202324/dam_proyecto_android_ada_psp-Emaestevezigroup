@@ -1,13 +1,13 @@
 package com.example.universidades.models
 
-data class University(
-    val id: Long,
-    val name: String,
-    val address: String,
-    val phoneNumber: String,
-    val email: String,
-    val hasScholarship: Boolean,
-    val location: Location,
-    val category: Category
-)
+import com.google.gson.annotations.SerializedName
 
+data class University(
+    @SerializedName("name") val name: String,
+    @SerializedName("address") val address: String,
+    @SerializedName("phoneNumber") val phoneNumber: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("hasScholarship") val hasScholarship: Boolean,
+    @SerializedName("location") val location: Location,
+    @SerializedName("category") val category: Category
+)
