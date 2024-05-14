@@ -1,4 +1,4 @@
-package com.example.universidades.ui.Screen
+package com.example.universidades.ui.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,17 +25,16 @@ fun UniversityListScreen(
     ) {
         Text(
             text = stringResource(id = R.string.university_list_title),
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 18.dp)
         )
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items(count = universities.size) { index ->
                 val university = universities[index]
                 UniversityListItem(university = university, onClick = onUniversitySelected)
             }
         }
-
 
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -49,9 +48,7 @@ fun UniversityListScreen(
 
 @Composable
 fun UniversityListItem(university: University, onClick: (String) -> Unit) {
-    Button(onClick = { onClick(university.id.toString()) }) {
+    Button(onClick = { onClick(university.name) }) {
         Text(text = university.name)
     }
 }
-
-
