@@ -7,7 +7,7 @@ data class University(
     @SerializedName("address") val address: String,
     @SerializedName("phoneNumber") val phoneNumber: String,
     @SerializedName("email") val email: String,
-    @SerializedName("hasScholarship") val hasScholarship: Boolean,
+    @SerializedName("hasScholarship") val hasScholarship: Boolean = false,
     @SerializedName("location") val location: Location,
     @SerializedName("category") val category: Category
 )
