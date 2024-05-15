@@ -41,6 +41,20 @@ class UniversityViewModel : ViewModel() {
             }
         }
     }
+
+    fun createUniversity(university: University) {
+        viewModelScope.launch {
+            try {
+                val createdUniversity = UniversityApi.retrofitService.createUniversity(university)
+                Log.d("UniversityViewModel", "University created: $createdUniversity")
+                // Aquí puedes agregar la lógica necesaria para manejar el resultado de la creación de la universidad
+            } catch (e: Exception) {
+                Log.e("UniversityViewModel", "Error creating university: ${e.message}", e)
+                // Aquí puedes agregar la lógica necesaria para manejar errores en la creación de la universidad
+            }
+        }
+    }
+
 }
 
 sealed class UniversityUiState {
