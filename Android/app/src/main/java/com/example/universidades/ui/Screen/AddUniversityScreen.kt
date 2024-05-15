@@ -1,32 +1,44 @@
 package com.example.universidades.ui.screen
 
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import com.example.universidades.models.Category
 import com.example.universidades.models.Location
 import com.example.universidades.models.University
+import com.example.universidades.viewmodels.UniversityViewModel
 
 @Composable
-fun AddUniversityScreen(navController: NavController) {
-    // Estados para los campos del formulario
-    var nameState by remember { mutableStateOf("") }
-    var addressState by remember { mutableStateOf("") }
-    var phoneNumberState by remember { mutableStateOf("") }
-    var emailState by remember { mutableStateOf("") }
-    var hasScholarshipState by remember { mutableStateOf(false) }
-    var locationState by remember { mutableStateOf("Location") }
-    var categoryState by remember { mutableStateOf("Category") }
+fun AddUniversityScreen(navController: NavController, universityViewModel: UniversityViewModel) {
+    val isLocationMenuExpanded = remember { mutableStateOf(false) }
+    val isCategoryMenuExpanded = remember { mutableStateOf(false) }
 
-    // Opciones para los menús desplegables
+    val nameState = remember { mutableStateOf("") }
+    val addressState = remember { mutableStateOf("") }
+    val phoneNumberState = remember { mutableStateOf("") }
+    val emailState = remember { mutableStateOf("") }
+    val locationState = remember { mutableStateOf("") }
+    val categoryState = remember { mutableStateOf("") }
+    val hasScholarshipState = remember { mutableStateOf(false) }
+
     val locations = listOf("Madrid", "Barcelona", "Sevilla", "Valencia", "Malaga")
     val categories = listOf("Ingenieria", "Arte", "Salud", "Ciencias", "Letras")
 
@@ -37,101 +49,165 @@ fun AddUniversityScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Campo de nombre de la universidad
+        Text("Agrega una nueva universidad", style = MaterialTheme.typography.h6)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         TextField(
-            value = nameState,
-            onValueChange = { nameState = it },
+            value = nameState.value,
+            onValueChange = { nameState.value = it },
             label = { Text("Name") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de dirección
         TextField(
-            value = addressState,
-            onValueChange = { addressState = it },
+            value = addressState.value,
+            onValueChange = { addressState.value = it },
             label = { Text("Address") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de número de teléfono
         TextField(
-            value = phoneNumberState,
-            onValueChange = { phoneNumberState = it },
+            value = phoneNumberState.value,
+            onValueChange = { phoneNumberState.value = it },
             label = { Text("Phone Number") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de correo electrónico
         TextField(
-            value = emailState,
-            onValueChange = { emailState = it },
+            value = emailState.value,
+            onValueChange = { emailState.value = it },
             label = { Text("Email") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón de beca
-        Button(onClick = { hasScholarshipState = !hasScholarshipState }) {
-            Text(if (hasScholarshipState) "Has Scholarship: Yes" else "Has Scholarship: No")
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp), // Ajuste del margen izquierdo
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Scholarship:")
+            Spacer(modifier = Modifier.width(8.dp))
+            RadioButton(
+                selected = hasScholarshipState.value,
+                onClick = { hasScholarshipState.value = true },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colors.secondary
+                )
+            )
+            Text(text = "Si")
+            Spacer(modifier = Modifier.width(16.dp))
+            RadioButton(
+                selected = !hasScholarshipState.value,
+                onClick = { hasScholarshipState.value = false },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colors.secondary
+                )
+            )
+            Text(text = "No")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Menú desplegable de localización
-        DropdownMenu(
-            expanded = locationState != "Location",
-            onDismissRequest = { locationState = "Location" }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(), // Asegurar que el ancho del Column sea igual al ancho del contenedor padre
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            locations.forEach { location ->
-                DropdownMenuItem(onClick = { locationState = location }) {
-                    Text(location)
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(16.dp)) // Espacio a la izquierda del texto
+                Text(
+                    text = if (locationState.value.isEmpty()) "- Localización -" else locationState.value,
+                    modifier = Modifier
+                        .clickable { isLocationMenuExpanded.value = !isLocationMenuExpanded.value }
+                        .padding(vertical = 16.dp)
+                        .weight(1f) // El texto ocupa el espacio restante
+                )
+            }
+            if (isLocationMenuExpanded.value) {
+                DropdownMenu(
+                    expanded = true,
+                    onDismissRequest = { isLocationMenuExpanded.value = false },
+                    modifier = Modifier.background(MaterialTheme.colors.surface)
+                ) {
+                    locations.forEach { location ->
+                        DropdownMenuItem(onClick = {
+                            locationState.value = location
+                            isLocationMenuExpanded.value = false
+                        }) {
+                            Text(location)
+                        }
+                    }
                 }
             }
-        }
-        Button(onClick = { /* Empty lambda */ }) {
-            Text(locationState)
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Menú desplegable de categoría
-        DropdownMenu(
-            expanded = categoryState != "Category",
-            onDismissRequest = { categoryState = "Category" }
+        Column(
+            modifier = Modifier.fillMaxWidth(), // Asegurar que el ancho del Column sea igual al ancho del contenedor padre
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            categories.forEach { category ->
-                DropdownMenuItem(onClick = { categoryState = category }) {
-                    Text(category)
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.width(16.dp)) // Espacio a la izquierda del texto
+                Text(
+                    text = if (categoryState.value.isEmpty()) "- Categoría -" else categoryState.value,
+                    modifier = Modifier
+                        .clickable { isCategoryMenuExpanded.value = !isCategoryMenuExpanded.value }
+                        .padding(vertical = 16.dp)
+                        .weight(1f) // El texto ocupa el espacio restante
+                )
+            }
+            if (isCategoryMenuExpanded.value) {
+                DropdownMenu(
+                    expanded = true,
+                    onDismissRequest = { isCategoryMenuExpanded.value = false },
+                    modifier = Modifier.background(MaterialTheme.colors.surface)
+                ) {
+                    categories.forEach { category ->
+                        DropdownMenuItem(onClick = {
+                            categoryState.value = category
+                            isCategoryMenuExpanded.value = false
+                        }) {
+                            Text(category)
+                        }
+                    }
                 }
             }
-        }
-        Button(onClick = { /* Empty lambda */ }) {
-            Text(categoryState)
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para enviar el formulario
         Button(onClick = {
-            val locationId = getLocationIdFromName(locationState)
-            val categoryId = getCategoryIdFromName(categoryState)
+            val locationId = getLocationIdFromName(locationState.value)
+            val categoryId = getCategoryIdFromName(categoryState.value)
 
             val university = University(
-                name = nameState,
-                address = addressState,
-                phoneNumber = phoneNumberState,
-                email = emailState,
-                hasScholarship = hasScholarshipState,
-                location = Location(id = locationId, name = locationState),
-                category = Category(id = categoryId, name = categoryState)
+                name = nameState.value,
+                address = addressState.value,
+                phoneNumber = phoneNumberState.value,
+                email = emailState.value,
+                hasScholarship = hasScholarshipState.value, // Asignar el valor de la beca
+                location = Location(id = locationId, name = locationState.value),
+                category = Category(id = categoryId, name = categoryState.value)
             )
 
-            // Aquí puedes manejar la lógica para enviar la universidad al backend o realizar otras acciones
+            universityViewModel.createUniversity(university)
+            navController.popBackStack()
         }) {
-            Text("Submit")
+            Text("Agregar")
         }
     }
 }
@@ -144,7 +220,7 @@ fun getLocationIdFromName(locationName: String): Long {
         "Valencia" to 4L,
         "Malaga" to 5L
     )
-    return locationsMap[locationName] ?: -1L // Devuelve -1 si no se encuentra la ubicación
+    return locationsMap[locationName] ?: -1L
 }
 
 fun getCategoryIdFromName(categoryName: String): Long {
@@ -155,5 +231,5 @@ fun getCategoryIdFromName(categoryName: String): Long {
         "Ciencias" to 4L,
         "Letras" to 5L
     )
-    return categoriesMap[categoryName] ?: -1L // Devuelve -1 si no se encuentra la categoría
+    return categoriesMap[categoryName] ?: -1L
 }
