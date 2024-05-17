@@ -34,37 +34,43 @@ import com.example.universidades.ui.screen.AddUniversityScreen
 import com.example.universidades.ui.screen.StartScreen
 import com.example.universidades.ui.screen.UniversityDetailScreen
 import com.example.universidades.ui.screen.UniversityListScreen
+import com.example.universidades.ui.theme.UniversityColors
 import com.example.universidades.viewmodels.UniversityUiState
 import com.example.universidades.viewmodels.UniversityViewModel
+import androidx.compose.material.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UniversityApp(navController: NavHostController = rememberNavController()) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    val universityViewModel: UniversityViewModel = viewModel()
-    val universityUiState by universityViewModel.universityUiState.observeAsState()
-
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { UniversityTopAppBar() }
+    MaterialTheme(
+        colors = UniversityColors,
+        typography = Typography()
     ) {
-        Column {
-            Spacer(modifier = Modifier.height(35.dp))
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-            Surface(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                UniversityContent(
-                    universityUiState = universityUiState ?: UniversityUiState.Loading,
-                    navController = navController,
-                )
+        val universityViewModel: UniversityViewModel = viewModel()
+        val universityUiState by universityViewModel.universityUiState.observeAsState()
+
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = { UniversityTopAppBar() }
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(35.dp))
+
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    UniversityContent(
+                        universityUiState = universityUiState ?: UniversityUiState.Loading,
+                        navController = navController,
+                    )
+                }
             }
         }
     }
 }
-
 
 @Composable
 fun UniversityTopAppBar(modifier: Modifier = Modifier) {
@@ -80,7 +86,7 @@ fun UniversityTopAppBar(modifier: Modifier = Modifier) {
                 Icon(Icons.Filled.Search, contentDescription = "Buscar")
             }
         },
-        backgroundColor = MaterialTheme.colors.primary, 
+        backgroundColor = MaterialTheme.colors.primary,
         contentColor = MaterialTheme.colors.onPrimary,
         modifier = modifier
     )
