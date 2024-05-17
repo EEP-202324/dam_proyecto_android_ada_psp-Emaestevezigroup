@@ -1,6 +1,5 @@
 package com.example.universidades.ui.screen
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,29 +7,31 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
 import com.example.universidades.models.Category
 import com.example.universidades.models.Location
 import com.example.universidades.models.University
 import com.example.universidades.viewmodels.UniversityViewModel
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun AddUniversityScreen(navController: NavController, universityViewModel: UniversityViewModel) {
     val isLocationMenuExpanded = remember { mutableStateOf(false) }
     val isCategoryMenuExpanded = remember { mutableStateOf(false) }
 
+    val idState = remember { mutableStateOf("") }
     val nameState = remember { mutableStateOf("") }
     val addressState = remember { mutableStateOf("") }
     val phoneNumberState = remember { mutableStateOf("") }
@@ -38,6 +39,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
     val locationState = remember { mutableStateOf("") }
     val categoryState = remember { mutableStateOf("") }
     val hasScholarshipState = remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val locations = listOf("Madrid", "Barcelona", "Sevilla", "Valencia", "Malaga")
     val categories = listOf("Ingenieria", "Arte", "Salud", "Ciencias", "Letras")
@@ -45,13 +47,13 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(10.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Agrega una nueva universidad", style = MaterialTheme.typography.h6)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         TextField(
             value = nameState.value,
@@ -59,7 +61,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
             label = { Text("Name") }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         TextField(
             value = addressState.value,
@@ -67,7 +69,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
             label = { Text("Address") }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         TextField(
             value = phoneNumberState.value,
@@ -75,7 +77,15 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
             label = { Text("Phone Number") }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        if (phoneNumberState.value.length != 9) {
+            Text(
+                text = "El número de teléfono debe tener 9 dígitos",
+                color = MaterialTheme.colors.error,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         TextField(
             value = emailState.value,
@@ -83,34 +93,46 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
             label = { Text("Email") }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        val emailRegex = Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
+        if (!emailRegex.matches(emailState.value)) {
+            Text(
+                text = "El formato del email no es correcto",
+                color = MaterialTheme.colors.error,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
 
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
-            modifier = Modifier.padding(vertical = 8.dp), // Ajuste del margen izquierdo
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Scholarship:")
             Spacer(modifier = Modifier.width(8.dp))
             RadioButton(
-                selected = hasScholarshipState.value,
-                onClick = { hasScholarshipState.value = true },
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.colors.secondary
-                )
-            )
-            Text(text = "Si")
-            Spacer(modifier = Modifier.width(16.dp))
-            RadioButton(
                 selected = !hasScholarshipState.value,
                 onClick = { hasScholarshipState.value = false },
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colors.secondary
-                )
+                ),
+                modifier = Modifier.align(Alignment.CenterVertically) // Alinea verticalmente el radio button
             )
-            Text(text = "No")
+            Text(text = "No", modifier = Modifier.align(Alignment.CenterVertically))
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            RadioButton(
+                selected = hasScholarshipState.value,
+                onClick = { hasScholarshipState.value = true },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colors.secondary
+                ),
+                modifier = Modifier.align(Alignment.CenterVertically) // Alinea verticalmente el radio button
+            )
+            Text(text = "Si", modifier = Modifier.align(Alignment.CenterVertically))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(10.dp))
 
 
         Column(
@@ -147,10 +169,8 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(), // Asegurar que el ancho del Column sea igual al ancho del contenedor padre
@@ -186,27 +206,58 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
-
-
-        Button(onClick = {
-            val locationId = getLocationIdFromName(locationState.value)
-            val categoryId = getCategoryIdFromName(categoryState.value)
-
-            val university = University(
-                name = nameState.value,
-                address = addressState.value,
-                phoneNumber = phoneNumberState.value,
-                email = emailState.value,
-                hasScholarship = hasScholarshipState.value, // Asignar el valor de la beca
-                location = Location(id = locationId, name = locationState.value),
-                category = Category(id = categoryId, name = categoryState.value)
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colors.error,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally)
             )
+        }
+        Button(
+            onClick = {
+                // Verificar que el número de teléfono tenga 9 dígitos
+                if (phoneNumberState.value.length != 9) {
+                    // Mostrar un mensaje de error o realizar alguna acción adecuada
+                    return@Button
+                }
 
-            universityViewModel.createUniversity(university)
-            navController.popBackStack()
-        }) {
+                // Verificar el formato del correo electrónico utilizando una expresión regular
+                if (!emailRegex.matches(emailState.value)) {
+                    // Mostrar un mensaje de error o realizar alguna acción adecuada
+                    return@Button
+                }
+
+                // Si la validación pasa, crear la instancia de University y enviarla al servidor
+                val university = University(
+                    id = idState.value?.toLongOrNull(),
+                    name = nameState.value,
+                    address = addressState.value,
+                    phoneNumber = phoneNumberState.value,
+                    email = emailState.value,
+                    hasScholarship = hasScholarshipState.value,
+                    location = Location(
+                        id = getLocationIdFromName(locationState.value),
+                        name = locationState.value
+                    ),
+                    category = Category(
+                        id = getCategoryIdFromName(categoryState.value),
+                        name = categoryState.value
+                    )
+                )
+
+                universityViewModel.createUniversity(university)
+                navController.popBackStack()
+            },
+            modifier = Modifier,
+            enabled = true,
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
             Text("Agregar")
         }
     }
