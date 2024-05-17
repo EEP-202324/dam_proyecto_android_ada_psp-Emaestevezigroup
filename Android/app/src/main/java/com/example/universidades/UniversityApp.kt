@@ -17,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -29,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.example.universidades.ui.screen.AddUniversityScreen
 import com.example.universidades.ui.screen.StartScreen
 import com.example.universidades.ui.screen.UniversityDetailScreen
@@ -47,7 +48,7 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { UniversityTopAppBar(scrollBehavior = scrollBehavior) }
+        topBar = { UniversityTopAppBar() }
     ) {
         Column {
             Spacer(modifier = Modifier.height(35.dp))
@@ -65,9 +66,8 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UniversityTopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modifier = Modifier) {
+fun UniversityTopAppBar(modifier: Modifier = Modifier) {
     TopAppBar(
         title = { Text(text = "Universidades") },
         navigationIcon = {
@@ -76,13 +76,12 @@ fun UniversityTopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modif
             }
         },
         actions = {
-            // Agregar acciones adicionales aquí, como botones de búsqueda o de perfil
             IconButton(onClick = { /* Acción 1 */ }) {
                 Icon(Icons.Filled.Search, contentDescription = "Buscar")
             }
         },
-        backgroundColor = MaterialTheme.colors.primary, // Color de fondo de la barra
-        contentColor = MaterialTheme.colors.onPrimary, // Color del contenido de la barra
+        backgroundColor = MaterialTheme.colors.primary, 
+        contentColor = MaterialTheme.colors.onPrimary,
         modifier = modifier
     )
 }
@@ -99,19 +98,49 @@ fun UniversityContent(universityUiState: UniversityUiState, navController: NavHo
         composable(route = "university_list") {
             UniversityListScreen(
                 universities = (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList(),
-                onUniversitySelected = { universityId ->
-                    navController.navigate("university_detail/$universityId")
+                onUniversitySelected = { university ->
+                    navController.navigate(
+                        "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
+                    )
                 },
                 onAddUniversityClicked = { navController.navigate("add_university") }
             )
         }
+        composable(
+            route = "university_detail/{universityId}/{name}/{address}/{phoneNumber}/{email}/{hasScholarship}/{location}/{category}",
+            arguments = listOf(
+                navArgument("universityId") { type = NavType.LongType },
+                navArgument("name") { type = NavType.StringType },
+                navArgument("address") { type = NavType.StringType },
+                navArgument("phoneNumber") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType },
+                navArgument("hasScholarship") { type = NavType.BoolType },
+                navArgument("location") { type = NavType.StringType },
+                navArgument("category") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val universityId = backStackEntry.arguments?.getLong("universityId")
+            val name = backStackEntry.arguments?.getString("name")
+            val address = backStackEntry.arguments?.getString("address")
+            val phoneNumber = backStackEntry.arguments?.getString("phoneNumber")
+            val email = backStackEntry.arguments?.getString("email")
+            val hasScholarship = backStackEntry.arguments?.getBoolean("hasScholarship") ?: false
+            val location = backStackEntry.arguments?.getString("location")
+            val category = backStackEntry.arguments?.getString("category")
 
-        composable(route = "university_detail/{universityId}") { backStackEntry ->
-            val universityId = backStackEntry.arguments?.getString("universityId")
-            if (universityId != null) {
-                UniversityDetailScreen(universityId = universityId)
+            if (universityId != null && name != null && address != null && phoneNumber != null && email != null && location != null && category != null) {
+                UniversityDetailScreen(
+                    universityId = universityId,
+                    name = name,
+                    address = address,
+                    phoneNumber = phoneNumber,
+                    email = email,
+                    hasScholarship = hasScholarship,
+                    location = location,
+                    category = category
+                )
             } else {
-                Text(text = "Error: ID de universidad no proporcionado")
+                Text(text = "Error: Faltan parámetros de la universidad")
             }
         }
 
@@ -119,6 +148,5 @@ fun UniversityContent(universityUiState: UniversityUiState, navController: NavHo
             val universityViewModel: UniversityViewModel = viewModel()
             AddUniversityScreen(navController = navController, universityViewModel = universityViewModel)
         }
-
     }
 }
