@@ -9,6 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.Typography
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -26,20 +27,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
+import com.example.universidades.models.University
 import com.example.universidades.ui.screen.AddUniversityScreen
+import com.example.universidades.ui.screen.SearchScreen
 import com.example.universidades.ui.screen.StartScreen
 import com.example.universidades.ui.screen.UniversityDetailScreen
 import com.example.universidades.ui.screen.UniversityListScreen
+import com.example.universidades.ui.screen.UniversitySearchResultsScreen
 import com.example.universidades.ui.theme.UniversityColors
 import com.example.universidades.viewmodels.UniversityUiState
 import com.example.universidades.viewmodels.UniversityViewModel
-import androidx.compose.material.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,8 +65,10 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
             topBar = {
                 UniversityTopAppBar(
                     showBackButton = currentRoute != "start",
-                    onBackButtonClicked = { navController.popBackStack() }
+                    onBackButtonClicked = { navController.popBackStack() },
+                    onSearchButtonClicked = { navController.navigate("search") }
                 )
+
             }
         ) {
             Column {
@@ -72,42 +77,31 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    UniversityContent(
-                        universityUiState = universityUiState ?: UniversityUiState.Loading,
-                        navController = navController,
-                        universityViewModel = universityViewModel
-                    )
+                    if (universityViewModel.isSearching) {
+                        UniversitySearchResultsScreen(
+                            searchResults = (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList(),
+                            onUniversitySelected = { university ->
+                                navController.navigate(
+                                    "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
+                                )
+                            }
+                        ) { university ->
+                            university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
+                        }
+                    } else {
+                        UniversityContent(
+                            universityUiState = universityUiState ?: UniversityUiState.Loading,
+                            navController = navController,
+                            universityViewModel = universityViewModel
+                        )
+                    }
+
                 }
             }
         }
     }
 }
 
-@Composable
-fun UniversityTopAppBar(
-    showBackButton: Boolean,
-    onBackButtonClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TopAppBar(
-        title = { Text(text = "Evento Aula") },
-        navigationIcon = {
-            if (showBackButton) {
-                IconButton(onClick = { onBackButtonClicked() }) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
-                }
-            }
-        },
-        actions = {
-            IconButton(onClick = { /* Acción de búsqueda */ }) {
-                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_button))
-            }
-        },
-        backgroundColor = MaterialTheme.colors.primary,
-        contentColor = MaterialTheme.colors.onPrimary,
-        modifier = modifier
-    )
-}
 
 @Composable
 fun UniversityContent(
@@ -133,9 +127,12 @@ fun UniversityContent(
                 onAddUniversityClicked = { navController.navigate("add_university") },
                 onDeleteUniversityClicked = { university ->
                     university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
-                }
+                },
+                navController = navController,
+                universityViewModel = universityViewModel
             )
         }
+
 
         composable(
             route = "university_detail/{universityId}/{name}/{address}/{phoneNumber}/{email}/{hasScholarship}/{location}/{category}",
@@ -156,19 +153,28 @@ fun UniversityContent(
             val phoneNumber = backStackEntry.arguments?.getString("phoneNumber")
             val email = backStackEntry.arguments?.getString("email")
             val hasScholarship = backStackEntry.arguments?.getBoolean("hasScholarship") ?: false
-            val location = backStackEntry.arguments?.getString("location")
+            // Obtener Location correspondiente al nombre
+            val locationName = backStackEntry.arguments?.getString("location")
             val category = backStackEntry.arguments?.getString("category")
 
-            if (universityId != null && name != null && address != null && phoneNumber != null && email != null && location != null && category != null) {
+            val location = locationName?.let { universityViewModel.getLocationByName(it) }
+            val categoryName = category?.let { universityViewModel.getCategoryByName(it) }
+
+            if (universityId != null && name != null && address != null && phoneNumber != null && email != null && location != null && categoryName != null) {
                 UniversityDetailScreen(
-                    universityId = universityId,
-                    name = name,
-                    address = address,
-                    phoneNumber = phoneNumber,
-                    email = email,
-                    hasScholarship = hasScholarship,
-                    location = location,
-                    category = category
+                    university = University(
+                        id = universityId,
+                        name = name,
+                        address = address,
+                        phoneNumber = phoneNumber,
+                        email = email,
+                        hasScholarship = hasScholarship,
+                        location = location,
+                        category = categoryName
+                    ),
+                    onUpdateUniversityClicked = { university ->
+                        universityViewModel.updateUniversity(university)
+                    }
                 )
             } else {
                 Text(text = "Error: Faltan parámetros de la universidad")
@@ -178,5 +184,53 @@ fun UniversityContent(
         composable(route = "add_university") {
             AddUniversityScreen(navController = navController, universityViewModel = universityViewModel)
         }
+
+        composable(route = "search") {
+            SearchScreen(navController = navController, universityViewModel = universityViewModel)
+        }
+
+        composable(route = "search_results") {
+            UniversitySearchResultsScreen(
+                searchResults = (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList(),
+                onUniversitySelected = { university ->
+                    navController.navigate(
+                        "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
+                    )
+                }
+            ) { university ->
+                university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
+            }
+        }
     }
 }
+
+
+@Composable
+fun UniversityTopAppBar(
+    showBackButton: Boolean,
+    onBackButtonClicked: () -> Unit,
+    onSearchButtonClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = { Text(text = "Evento Aula") },
+        navigationIcon = {
+            if (showBackButton) {
+                IconButton(onClick = { onBackButtonClicked() }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
+                }
+            }
+        },
+        actions = {
+            IconButton(onClick = onSearchButtonClicked) {
+                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_button))
+            }
+        },
+        backgroundColor = MaterialTheme.colors.primary,
+        contentColor = MaterialTheme.colors.onPrimary,
+        modifier = modifier
+    )
+}
+
+
+
