@@ -136,7 +136,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
 
 
         Column(
-            modifier = Modifier.fillMaxWidth(), // Asegurar que el ancho del Column sea igual al ancho del contenedor padre
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -144,13 +144,13 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(modifier = Modifier.width(16.dp)) // Espacio a la izquierda del texto
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = if (locationState.value.isEmpty()) "- Localización -" else locationState.value,
                     modifier = Modifier
                         .clickable { isLocationMenuExpanded.value = !isLocationMenuExpanded.value }
                         .padding(vertical = 16.dp)
-                        .weight(1f) // El texto ocupa el espacio restante
+                        .weight(1f)
                 )
             }
             if (isLocationMenuExpanded.value) {
@@ -173,7 +173,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth(), // Asegurar que el ancho del Column sea igual al ancho del contenedor padre
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -187,7 +187,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                     modifier = Modifier
                         .clickable { isCategoryMenuExpanded.value = !isCategoryMenuExpanded.value }
                         .padding(vertical = 16.dp)
-                        .weight(1f) // El texto ocupa el espacio restante
+                        .weight(1f)
                 )
             }
             if (isCategoryMenuExpanded.value) {
@@ -219,19 +219,14 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
         }
         Button(
             onClick = {
-                // Verificar que el número de teléfono tenga 9 dígitos
                 if (phoneNumberState.value.length != 9) {
-                    // Mostrar un mensaje de error o realizar alguna acción adecuada
                     return@Button
                 }
 
-                // Verificar el formato del correo electrónico utilizando una expresión regular
                 if (!emailRegex.matches(emailState.value)) {
-                    // Mostrar un mensaje de error o realizar alguna acción adecuada
                     return@Button
                 }
 
-                // Si la validación pasa, crear la instancia de University y enviarla al servidor
                 val university = University(
                     id = idState.value?.toLongOrNull(),
                     name = nameState.value,
