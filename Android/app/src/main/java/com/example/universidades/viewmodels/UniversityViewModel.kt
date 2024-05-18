@@ -1,10 +1,14 @@
 package com.example.universidades.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.universidades.api.UniversityApi
 import com.example.universidades.models.Category
 import com.example.universidades.models.Location
@@ -13,6 +17,10 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 class UniversityViewModel : ViewModel() {
+
+    var isSearching by mutableStateOf(false)
+        private set
+
     private val _universityUiState = MutableLiveData<UniversityUiState>()
     val universityUiState: LiveData<UniversityUiState> = _universityUiState
 
@@ -30,7 +38,7 @@ class UniversityViewModel : ViewModel() {
         loadCategories()
     }
 
-    private fun loadUniversities() {
+    fun loadUniversities() {
         viewModelScope.launch {
             try {
                 _universityUiState.value = UniversityUiState.Loading
@@ -50,7 +58,6 @@ class UniversityViewModel : ViewModel() {
                 _locations.postValue(locations)
             } catch (e: Exception) {
                 Log.e("UniversityViewModel", "Error cargando ubicaciones: ${e.message}", e)
-                // Manejar el error según sea necesario
             }
         }
     }
@@ -62,7 +69,6 @@ class UniversityViewModel : ViewModel() {
                 _categories.postValue(categories)
             } catch (e: Exception) {
                 Log.e("UniversityViewModel", "Error cargando categorías: ${e.message}", e)
-                // Manejar el error según sea necesario
             }
         }
     }
@@ -94,14 +100,53 @@ class UniversityViewModel : ViewModel() {
                 UniversityApi.retrofitService.deleteUniversity(universityId)
                 loadUniversities()
             } catch (e: Exception) {
-                _universityUiState.value = UniversityUiState.Error("Error deleting university: ${e.message}")
+                _universityUiState.value = UniversityUiState.Error("Error eliminando universidad: ${e.message}")
             }
         }
     }
+
+    fun searchUniversities(id: String, category: String, location: String) {
+        val allUniversities = (universityUiState.value as? UniversityUiState.Success)?.universities ?: emptyList()
+        val filteredUniversities = allUniversities.filter { university ->
+            (id.isEmpty() || university.id.toString() == id) &&
+                    (category.isEmpty() || university.category.name.equals(category, ignoreCase = true)) &&
+                    (location.isEmpty() || university.location.name.equals(location, ignoreCase = true))
+        }
+        _universityUiState.value = UniversityUiState.Success(filteredUniversities)
+    }
+
+    fun updateUniversity(university: University) {
+        viewModelScope.launch {
+            try {
+                val updatedUniversity = UniversityApi.retrofitService.updateUniversity(university.id!!, university)
+            } catch (e: Exception) {
+                // Manejar cualquier error que ocurra durante la actualización, como mostrar un mensaje de error al usuario
+            }
+        }
+    }
+
+    fun getLocationByName(name: String): Location? {
+        // Implementa la lógica para buscar la ubicación por su nombre
+        // Si estás utilizando una lista de ubicaciones predefinida, podrías hacer algo como esto:
+        val locations: List<Location> = _locations.value ?: return null
+        return locations.find { it.name == name }
+    }
+
+    fun getCategoryByName(name: String): Category? {
+        // Implementa la lógica para buscar la categoría por su nombre
+        // Si estás utilizando una lista de categorías predefinida, podrías hacer algo como esto:
+        val categories: List<Category> = _categories.value ?: return null
+        return categories.find { it.name == name }
+    }
+
+    fun navigateToUniversityDetailScreen(navController: NavHostController, university: University) {
+        navController.navigate("university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}")
+    }
+
 }
 
 sealed class UniversityUiState {
-    object Loading : UniversityUiState()
+    data object Loading : UniversityUiState()
     data class Success(val universities: List<University>) : UniversityUiState()
     data class Error(val message: String) : UniversityUiState()
 }
