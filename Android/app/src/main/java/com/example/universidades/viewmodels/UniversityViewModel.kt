@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.universidades.api.UniversityApi
+import com.example.universidades.models.Category
+import com.example.universidades.models.Location
 import com.example.universidades.models.University
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -16,8 +18,16 @@ class UniversityViewModel : ViewModel() {
 
     private val _errorMessage = MutableLiveData<String>()
 
+    private val _locations = MutableLiveData<List<Location>>()
+    val locations: LiveData<List<Location>> = _locations
+
+    private val _categories = MutableLiveData<List<Category>>()
+    val categories: LiveData<List<Category>> = _categories
+
     init {
         loadUniversities()
+        loadLocations()
+        loadCategories()
     }
 
     private fun loadUniversities() {
@@ -29,6 +39,30 @@ class UniversityViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("UniversityViewModel", "Error cargando universidades: ${e.message}", e)
                 _universityUiState.value = UniversityUiState.Error("Error cargando universidades: ${e.message}")
+            }
+        }
+    }
+
+    private fun loadLocations() {
+        viewModelScope.launch {
+            try {
+                val locations = UniversityApi.retrofitService.getAllLocations()
+                _locations.postValue(locations)
+            } catch (e: Exception) {
+                Log.e("UniversityViewModel", "Error cargando ubicaciones: ${e.message}", e)
+                // Manejar el error según sea necesario
+            }
+        }
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            try {
+                val categories = UniversityApi.retrofitService.getAllCategories()
+                _categories.postValue(categories)
+            } catch (e: Exception) {
+                Log.e("UniversityViewModel", "Error cargando categorías: ${e.message}", e)
+                // Manejar el error según sea necesario
             }
         }
     }
