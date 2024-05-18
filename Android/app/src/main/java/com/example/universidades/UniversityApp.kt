@@ -65,6 +65,7 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
                     UniversityContent(
                         universityUiState = universityUiState ?: UniversityUiState.Loading,
                         navController = navController,
+                        universityViewModel = universityViewModel
                     )
                 }
             }
@@ -92,15 +93,19 @@ fun UniversityTopAppBar(modifier: Modifier = Modifier) {
     )
 }
 
-
 @Composable
-fun UniversityContent(universityUiState: UniversityUiState, navController: NavHostController) {
+fun UniversityContent(
+    universityUiState: UniversityUiState,
+    navController: NavHostController,
+    universityViewModel: UniversityViewModel
+) {
     NavHost(navController = navController, startDestination = "start") {
         composable(route = "start") {
             StartScreen(
                 onStartButtonClicked = { navController.navigate("university_list") }
             )
         }
+
         composable(route = "university_list") {
             UniversityListScreen(
                 universities = (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList(),
@@ -109,9 +114,13 @@ fun UniversityContent(universityUiState: UniversityUiState, navController: NavHo
                         "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
                     )
                 },
-                onAddUniversityClicked = { navController.navigate("add_university") }
+                onAddUniversityClicked = { navController.navigate("add_university") },
+                onDeleteUniversityClicked = { university ->
+                    university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
+                }
             )
         }
+
         composable(
             route = "university_detail/{universityId}/{name}/{address}/{phoneNumber}/{email}/{hasScholarship}/{location}/{category}",
             arguments = listOf(
@@ -151,7 +160,6 @@ fun UniversityContent(universityUiState: UniversityUiState, navController: NavHo
         }
 
         composable(route = "add_university") {
-            val universityViewModel: UniversityViewModel = viewModel()
             AddUniversityScreen(navController = navController, universityViewModel = universityViewModel)
         }
     }
