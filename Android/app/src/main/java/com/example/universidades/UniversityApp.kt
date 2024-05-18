@@ -10,7 +10,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -22,11 +22,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
@@ -52,9 +54,17 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
         val universityViewModel: UniversityViewModel = viewModel()
         val universityUiState by universityViewModel.universityUiState.observeAsState()
 
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = { UniversityTopAppBar() }
+            topBar = {
+                UniversityTopAppBar(
+                    showBackButton = currentRoute != "start",
+                    onBackButtonClicked = { navController.popBackStack() }
+                )
+            }
         ) {
             Column {
                 Spacer(modifier = Modifier.height(35.dp))
@@ -74,17 +84,23 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
 }
 
 @Composable
-fun UniversityTopAppBar(modifier: Modifier = Modifier) {
+fun UniversityTopAppBar(
+    showBackButton: Boolean,
+    onBackButtonClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     TopAppBar(
-        title = { Text(text = "Universidades") },
+        title = { Text(text = "Evento Aula") },
         navigationIcon = {
-            IconButton(onClick = { /* Manejar la navegación hacia atrás o abrir el menú lateral */ }) {
-                Icon(Icons.Filled.Menu, contentDescription = "Menú")
+            if (showBackButton) {
+                IconButton(onClick = { onBackButtonClicked() }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button))
+                }
             }
         },
         actions = {
-            IconButton(onClick = { /* Acción 1 */ }) {
-                Icon(Icons.Filled.Search, contentDescription = "Buscar")
+            IconButton(onClick = { /* Acción de búsqueda */ }) {
+                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_button))
             }
         },
         backgroundColor = MaterialTheme.colors.primary,
