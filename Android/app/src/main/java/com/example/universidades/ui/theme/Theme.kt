@@ -1,28 +1,28 @@
 package com.example.universidades.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Define los colores
+val PurpleDark = Color(0xFF6200EE)
+val PurpleGreyDark = Color(0xFF9E9E9E)
+val PinkDark = Color(0xFFE91E63)
+
+val PurpleLight = Color(0xFFBB86FC)
+val PurpleGreyLight = Color(0xFFBDBDBD)
+val PinkLight = Color(0xFFEC407A)
+
+// Esquema de color oscuro
+val DarkColorScheme = darkColorScheme(
+    primary = PurpleDark,
+    secondary = PurpleGreyDark,
+    tertiary = PinkDark
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+// Esquema de color claro
+val LightColorScheme = lightColorScheme(
+    primary = PurpleLight, // Usando PurpleDark en lugar de Purple40
+    secondary = PurpleGreyLight,
+    tertiary = PinkLight
 )
