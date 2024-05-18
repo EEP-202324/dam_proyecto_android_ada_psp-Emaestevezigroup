@@ -1,7 +1,9 @@
+<!-- res/values/strings.xml -->
 <resources>
     <string name="app_name">Universidades</string>
-    <string name="start_button_label">Start</string>
-    <string name="start_screen_title">Start Screen</string>
-    <string name="add_university_button_label">Añadir</string>
+    <string name="logo_description">Logo</string>
+    <string name="welcome_message">Bienvenido</string>
+    <string name="start_button_label">Comenzar</string>
     <string name="university_list_title">Lista de Universidades</string>
+    <string name="add_university_button_label">Añadir Universidad</string>
 </resources>
