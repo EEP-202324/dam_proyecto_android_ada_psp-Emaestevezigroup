@@ -24,7 +24,10 @@ import com.example.universidades.viewmodels.UniversityViewModel
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun AddUniversityScreen(navController: NavController, universityViewModel: UniversityViewModel) {
@@ -41,8 +44,11 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
     val hasScholarshipState = remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val locations = listOf("Madrid", "Barcelona", "Sevilla", "Valencia", "Malaga")
-    val categories = listOf("Ingenieria", "Arte", "Salud", "Ciencias", "Letras")
+    val locations by universityViewModel.locations.observeAsState(emptyList())
+    val categories by universityViewModel.categories.observeAsState(emptyList())
+
+    val locationNames = locations.map { it.name }
+    val categoryNames = categories.map { it.name }
 
     Column(
         modifier = Modifier
@@ -161,10 +167,10 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                 ) {
                     locations.forEach { location ->
                         DropdownMenuItem(onClick = {
-                            locationState.value = location
+                            locationState.value = location.name
                             isLocationMenuExpanded.value = false
                         }) {
-                            Text(location)
+                            Text(location.name)
                         }
                     }
                 }
@@ -181,7 +187,7 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(modifier = Modifier.width(16.dp)) // Espacio a la izquierda del texto
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = if (categoryState.value.isEmpty()) "- Categoría -" else categoryState.value,
                     modifier = Modifier
@@ -198,16 +204,17 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
                 ) {
                     categories.forEach { category ->
                         DropdownMenuItem(onClick = {
-                            categoryState.value = category
+                            categoryState.value = category.name
                             isCategoryMenuExpanded.value = false
                         }) {
-                            Text(category)
+                            Text(category.name)
                         }
                     }
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
+
         errorMessage?.let {
             Text(
                 text = it,
@@ -253,7 +260,12 @@ fun AddUniversityScreen(navController: NavController, universityViewModel: Unive
             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text("Agregar")
+            Text(
+                text = "Agregar",
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.button,
+                color = MaterialTheme.colors.onPrimary
+            )
         }
     }
 }
