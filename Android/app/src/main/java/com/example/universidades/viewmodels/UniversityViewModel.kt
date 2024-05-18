@@ -37,6 +37,7 @@ class UniversityViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 UniversityApi.retrofitService.createUniversity(university)
+                loadUniversities()
             } catch (e: Exception) {
                 val errorMessage = when (e) {
                     is HttpException -> {
@@ -49,6 +50,17 @@ class UniversityViewModel : ViewModel() {
                 }
                 _errorMessage.postValue(errorMessage)
                 Log.e("UniversityViewModel", errorMessage, e)
+            }
+        }
+    }
+
+    fun deleteUniversity(universityId: Long) {
+        viewModelScope.launch {
+            try {
+                UniversityApi.retrofitService.deleteUniversity(universityId)
+                loadUniversities()
+            } catch (e: Exception) {
+                _universityUiState.value = UniversityUiState.Error("Error deleting university: ${e.message}")
             }
         }
     }
