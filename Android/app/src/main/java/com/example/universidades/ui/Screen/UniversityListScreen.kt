@@ -1,54 +1,126 @@
 package com.example.universidades.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.universidades.R
 import com.example.universidades.models.University
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun UniversityListScreen(
     universities: List<University>,
-    onUniversitySelected: (String) -> Unit,
+    onUniversitySelected: (University) -> Unit,
+    onDeleteUniversityClicked: (University) -> Unit,
     onAddUniversityClicked: () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val dialogState = remember { mutableStateOf(false) }
+    val selectedUniversity = remember { mutableStateOf<University?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = stringResource(id = R.string.university_list_title),
-            modifier = Modifier.padding(bottom = 18.dp)
+            modifier = Modifier.padding(bottom = 18.dp),
+            style = MaterialTheme.typography.h6
         )
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(count = universities.size) { index ->
-                val university = universities[index]
-                UniversityListItem(university = university, onClick = onUniversitySelected)
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(universities) { university ->
+                    Row(
+                        modifier = Modifier
+                            .padding(18.dp)
+                            .clickable { onUniversitySelected(university) }
+                            .background(color = Color.White),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = university.name,
+                            style = MaterialTheme.typography.body1,
+                            color = MaterialTheme.colors.onBackground,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = {
+                                selectedUniversity.value = university
+                                dialogState.value = true
+                            },
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = Color.Red
+                            )
+                        }
+                    }
+                }
+            }
+            Button(
+                onClick = onAddUniversityClicked,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(vertical = 16.dp)
+            ) {
+                Text(text = stringResource(id = R.string.add_university_button_label))
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = onAddUniversityClicked,
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text(text = stringResource(id = R.string.add_university_button_label))
-        }
     }
-}
 
-@Composable
-fun UniversityListItem(university: University, onClick: (String) -> Unit) {
-    Button(onClick = { onClick(university.name) }) {
-        Text(text = university.name)
+    if (dialogState.value) {
+        AlertDialog(
+            onDismissRequest = {
+                dialogState.value = false
+                selectedUniversity.value = null
+            },
+            title = { Text(text = "Confirmar eliminación") },
+            text = { Text(text = "¿Está seguro de que desea eliminar esta universidad?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            onDeleteUniversityClicked(selectedUniversity.value!!)
+                            dialogState.value = false
+                            selectedUniversity.value = null
+                        }
+                    }
+                ) {
+                    Text(text = "Sí")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        dialogState.value = false
+                        selectedUniversity.value = null
+                    }
+                ) {
+                    Text(text = "Cancelar")
+                }
+            }
+        )
     }
 }
