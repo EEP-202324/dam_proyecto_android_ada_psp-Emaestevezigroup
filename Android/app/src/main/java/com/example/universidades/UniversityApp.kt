@@ -69,22 +69,28 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
                     when (currentRoute) {
                         "university_list" -> {
                             val searchResultsList: List<University> =
-                                (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList()
+                                (universityUiState as? UniversityUiState.Success)?.universities
+                                    ?: emptyList()
 
                             UniversityListScreen(
                                 universities = searchResultsList,
+                                onDeleteUniversityClicked = { university ->
+                                    university.id?.let { it1 ->
+                                        universityViewModel.deleteUniversity(
+                                            it1
+                                        )
+                                    }
+                                },
+                                onAddUniversityClicked = { navController.navigate("add_university") },
                                 onUniversitySelected = { university ->
                                     navController.navigate(
                                         "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
                                     )
                                 },
-                                onDeleteUniversityClicked = { university ->
-                                    university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
-                                },
-                                onAddUniversityClicked = { navController.navigate("add_university") },
                                 universityViewModel = universityViewModel
                             )
                         }
+
                         else -> {
                             UniversityContent(
                                 universityUiState = universityUiState ?: UniversityUiState.Loading,
@@ -115,19 +121,18 @@ fun UniversityContent(
         composable(route = "university_list") {
             UniversityListScreen(
                 universities = (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList(),
+                onDeleteUniversityClicked = { university ->
+                    university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
+                },
+                onAddUniversityClicked = { navController.navigate("add_university") },
                 onUniversitySelected = { university ->
                     navController.navigate(
                         "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
                     )
                 },
-                onDeleteUniversityClicked = { university ->
-                    university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
-                },
-                onAddUniversityClicked = { navController.navigate("add_university") },
-                universityViewModel = universityViewModel
+                universityViewModel = universityViewModel,
             )
         }
-
 
         composable(
             route = "university_detail/{universityId}/{name}/{address}/{phoneNumber}/{email}/{hasScholarship}/{location}/{category}",
@@ -155,30 +160,30 @@ fun UniversityContent(
             val categoryName = category?.let { universityViewModel.getCategoryByName(it) }
 
             if (universityId != null && name != null && address != null && phoneNumber != null && email != null && location != null && categoryName != null) {
+                val university = University(
+                    id = universityId,
+                    name = name,
+                    address = address,
+                    phoneNumber = phoneNumber,
+                    email = email,
+                    hasScholarship = hasScholarship,
+                    location = location,
+                    category = categoryName
+                )
                 UniversityDetailScreen(
-                    university = University(
-                        id = universityId,
-                        name = name,
-                        address = address,
-                        phoneNumber = phoneNumber,
-                        email = email,
-                        hasScholarship = hasScholarship,
-                        location = location,
-                        category = categoryName
-                    )
+                    university = university,
+                    onUpdateUniversityClicked = { updatedUniversity ->
+                        universityViewModel.updateUniversity(updatedUniversity)
+                    }
                 )
             } else {
                 Text(text = "Error: Faltan parámetros de la universidad")
             }
-
-
         }
 
         composable(route = "add_university") {
             AddUniversityScreen(navController = navController, universityViewModel = universityViewModel, university = null)
         }
-
-
 
         composable(route = "search") {
             SearchScreen(navController = navController, universityViewModel = universityViewModel)

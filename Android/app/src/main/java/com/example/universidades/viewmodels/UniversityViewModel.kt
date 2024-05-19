@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.universidades.api.ApiService
+import com.example.universidades.api.UniversityApi
 import com.example.universidades.models.Category
 import com.example.universidades.models.Location
 import com.example.universidades.models.University
@@ -27,6 +28,12 @@ class UniversityViewModel(private val apiService: ApiService) : ViewModel() {
 
     private val _categories = MutableLiveData<List<Category>>()
     val categories: LiveData<List<Category>> = _categories
+
+    private val _updateUniversityStatus = MutableLiveData<UpdateUniversityStatus>()
+    val updateUniversityStatus: LiveData<UpdateUniversityStatus> = _updateUniversityStatus
+
+    private val universities = mutableStateOf<List<University>>(emptyList())
+
 
 
     init {
@@ -47,6 +54,27 @@ class UniversityViewModel(private val apiService: ApiService) : ViewModel() {
             }
         }
     }
+
+    fun updateUniversity(university: University) {
+        viewModelScope.launch {
+            _updateUniversityStatus.value = UpdateUniversityStatus.Loading
+            try {
+                val updatedUniversity = UniversityApi.retrofitService.updateUniversity(university.id!!, university)
+
+                universities.value = universities.value.map { existingUniversity ->
+                    if (existingUniversity.id == updatedUniversity.id) {
+                        updatedUniversity
+                    } else {
+                        existingUniversity
+                    }
+                }
+                _updateUniversityStatus.value = UpdateUniversityStatus.Success
+            } catch (e: Exception) {
+                _updateUniversityStatus.value = UpdateUniversityStatus.Error("Failed to update university: ${e.message}")
+            }
+        }
+    }
+
 
     fun loadLocations() {
         viewModelScope.launch {
@@ -130,3 +158,10 @@ sealed class UniversityUiState {
     data class Success(val universities: List<University>) : UniversityUiState()
     data class Error(val message: String) : UniversityUiState()
 }
+
+sealed class UpdateUniversityStatus {
+    object Loading : UpdateUniversityStatus()
+    object Success : UpdateUniversityStatus()
+    data class Error(val message: String) : UpdateUniversityStatus()
+}
+

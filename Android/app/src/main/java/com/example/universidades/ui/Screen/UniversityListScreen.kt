@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,8 +21,10 @@ import androidx.compose.ui.unit.dp
 import com.example.universidades.R
 import com.example.universidades.models.University
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavController
 import com.example.universidades.viewmodels.UniversityViewModel
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun UniversityListScreen(
@@ -50,32 +53,30 @@ fun UniversityListScreen(
             modifier = Modifier.padding(bottom = 18.dp),
             style = MaterialTheme.typography.h6
         )
-        Box(
+        LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(universities) { university ->
-                    Row(
-                        modifier = Modifier
-                            .padding(18.dp)
-                            .clickable { onUniversitySelected(university) }
-                            .background(color = Color.White),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = university.name,
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onBackground,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(
-                            onClick = {
-                                selectedUniversity.value = university
-                                dialogState.value = true
-                            },
-                            modifier = Modifier.padding(start = 8.dp)
+            items(universities) { university ->
+                Row(
+                    modifier = Modifier
+                        .padding(18.dp)
+                        .background(color = Color.White)
+                        .clickable { onUniversitySelected(university) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = university.name,
+                        style = MaterialTheme.typography.body1,
+                        color = MaterialTheme.colors.onBackground,
+                        modifier = Modifier.clickable { onUniversitySelected(university) }
+                    )
+                    IconButton(
+                        onClick = {
+                            selectedUniversity.value = university
+                            dialogState.value = true
+                                  },
+                            modifier = Modifier.padding(end = 40.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -83,18 +84,17 @@ fun UniversityListScreen(
                                 tint = Color.Red
                             )
                         }
-                    }
+
                 }
             }
-            Button(
-                onClick = onAddUniversityClicked,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(vertical = 16.dp)
-            ) {
-                Text(text = stringResource(id = R.string.add_university_button_label))
-            }
         }
+        Button(
+            onClick = onAddUniversityClicked,
+            modifier = Modifier.padding(vertical = 16.dp)
+        ) {
+            Text(text = stringResource(id = R.string.add_university_button_label))
+        }
+
     }
 
     if (dialogState.value) {
