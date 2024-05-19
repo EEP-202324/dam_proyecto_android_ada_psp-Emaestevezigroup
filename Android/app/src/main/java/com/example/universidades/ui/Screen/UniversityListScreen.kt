@@ -54,7 +54,7 @@ fun UniversityListScreen(
             style = MaterialTheme.typography.h6
         )
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.weight(1f) // Ajusta el LazyColumn para que ocupe todo el espacio disponible
         ) {
             items(universities) { university ->
                 Row(
@@ -69,34 +69,36 @@ fun UniversityListScreen(
                         text = university.name,
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onBackground,
-                        modifier = Modifier.clickable { onUniversitySelected(university) }
+                        modifier = Modifier.weight(1f)
+                            .clickable { onUniversitySelected(university) }
                     )
                     IconButton(
                         onClick = {
                             selectedUniversity.value = university
                             dialogState.value = true
-                                  },
-                            modifier = Modifier.padding(end = 40.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = Color.Red
-                            )
                         }
-
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.Red
+                        )
+                    }
                 }
+
             }
         }
         Button(
             onClick = onAddUniversityClicked,
-            modifier = Modifier.padding(vertical = 16.dp)
+            modifier = Modifier
+                .defaultMinSize(minWidth = 0.dp, minHeight = 0.dp)
+                .padding(horizontal = 70.dp, vertical = 8.dp)
         ) {
             Text(text = stringResource(id = R.string.add_university_button_label))
         }
-
     }
 
+    // Diálogo de confirmación de eliminación
     if (dialogState.value) {
         AlertDialog(
             onDismissRequest = {
