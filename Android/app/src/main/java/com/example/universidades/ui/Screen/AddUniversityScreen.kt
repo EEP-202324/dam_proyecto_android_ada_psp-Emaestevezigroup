@@ -1,274 +1,261 @@
 package com.example.universidades.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.Button
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
 import com.example.universidades.models.Category
 import com.example.universidades.models.Location
 import com.example.universidades.models.University
+import androidx.compose.ui.platform.LocalDensity
 import com.example.universidades.viewmodels.UniversityViewModel
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+
 
 @Composable
-fun AddUniversityScreen(navController: NavController, universityViewModel: UniversityViewModel) {
-    val isLocationMenuExpanded = remember { mutableStateOf(false) }
-    val isCategoryMenuExpanded = remember { mutableStateOf(false) }
+fun AddUniversityScreen(
+    navController: NavController,
+    universityViewModel: UniversityViewModel,
+    university: University?,
+) {
+    val locations by universityViewModel.locations.observeAsState(initial = emptyList())
+    val categories by universityViewModel.categories.observeAsState(initial = emptyList())
 
-    val idState = remember { mutableStateOf("") }
-    val nameState = remember { mutableStateOf("") }
-    val addressState = remember { mutableStateOf("") }
-    val phoneNumberState = remember { mutableStateOf("") }
-    val emailState = remember { mutableStateOf("") }
-    val locationState = remember { mutableStateOf("") }
-    val categoryState = remember { mutableStateOf("") }
-    val hasScholarshipState = remember { mutableStateOf(false) }
+    var id by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+    var hasScholarship by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val locations by universityViewModel.locations.observeAsState(emptyList())
-    val categories by universityViewModel.categories.observeAsState(emptyList())
+    val emailRegex = Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
 
-    val locationNames = locations.map { it.name }
-    val categoryNames = categories.map { it.name }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(10.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(10.dp), // Agregar espacio vertical entre cada elemento del formulario
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Agrega una nueva universidad", style = MaterialTheme.typography.h6)
 
-        Spacer(modifier = Modifier.height(20.dp))
-
         TextField(
-            value = nameState.value,
-            onValueChange = { nameState.value = it },
+            value = name,
+            onValueChange = { name = it },
             label = { Text("Name") }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
         TextField(
-            value = addressState.value,
-            onValueChange = { addressState.value = it },
+            value = address,
+            onValueChange = { address = it },
             label = { Text("Address") }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
         TextField(
-            value = phoneNumberState.value,
-            onValueChange = { phoneNumberState.value = it },
+            value = phoneNumber,
+            onValueChange = { phoneNumber = it },
             label = { Text("Phone Number") }
         )
 
-        if (phoneNumberState.value.length != 9) {
+        if (phoneNumber.length != 9) {
             Text(
                 text = "El número de teléfono debe tener 9 dígitos",
-                color = MaterialTheme.colors.error,
-                modifier = Modifier.padding(start = 16.dp)
+                color = MaterialTheme.colors.error
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
         TextField(
-            value = emailState.value,
-            onValueChange = { emailState.value = it },
+            value = email,
+            onValueChange = { email = it },
             label = { Text("Email") }
         )
 
-        val emailRegex = Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
-        if (!emailRegex.matches(emailState.value)) {
+        if (!emailRegex.matches(email)) {
             Text(
                 text = "El formato del email no es correcto",
-                color = MaterialTheme.colors.error,
-                modifier = Modifier.padding(start = 16.dp)
+                color = MaterialTheme.colors.error
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Scholarship:")
             Spacer(modifier = Modifier.width(8.dp))
             RadioButton(
-                selected = !hasScholarshipState.value,
-                onClick = { hasScholarshipState.value = false },
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.colors.secondary
-                ),
-                modifier = Modifier.align(Alignment.CenterVertically) // Alinea verticalmente el radio button
+                selected = !hasScholarship,
+                onClick = { hasScholarship = false },
+                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.secondary)
             )
-            Text(text = "No", modifier = Modifier.align(Alignment.CenterVertically))
-
+            Text(text = "No")
             Spacer(modifier = Modifier.width(16.dp))
-
             RadioButton(
-                selected = hasScholarshipState.value,
-                onClick = { hasScholarshipState.value = true },
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.colors.secondary
-                ),
-                modifier = Modifier.align(Alignment.CenterVertically) // Alinea verticalmente el radio button
+                selected = hasScholarship,
+                onClick = { hasScholarship = true },
+                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.secondary)
             )
-            Text(text = "Si", modifier = Modifier.align(Alignment.CenterVertically))
+            Text(text = "Sí")
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 35.dp),
+            ) {
+                DropdownTextField(
+                    label = "Location",
+                    value = location,
+                    onValueChange = { location = it },
+                    items = locations.map { it.name }
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
-
-        Column(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 35.dp),
             ) {
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = if (locationState.value.isEmpty()) "- Localización -" else locationState.value,
-                    modifier = Modifier
-                        .clickable { isLocationMenuExpanded.value = !isLocationMenuExpanded.value }
-                        .padding(vertical = 16.dp)
-                        .weight(1f)
+                DropdownTextField(
+                    label = "Category",
+                    value = category,
+                    onValueChange = { category = it },
+                    items = categories.map { it.name }
                 )
             }
-            if (isLocationMenuExpanded.value) {
-                DropdownMenu(
-                    expanded = true,
-                    onDismissRequest = { isLocationMenuExpanded.value = false },
-                    modifier = Modifier.background(MaterialTheme.colors.surface)
-                ) {
-                    locations.forEach { location ->
-                        DropdownMenuItem(onClick = {
-                            locationState.value = location.name
-                            isLocationMenuExpanded.value = false
-                        }) {
-                            Text(location.name)
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = if (categoryState.value.isEmpty()) "- Categoría -" else categoryState.value,
-                    modifier = Modifier
-                        .clickable { isCategoryMenuExpanded.value = !isCategoryMenuExpanded.value }
-                        .padding(vertical = 16.dp)
-                        .weight(1f)
-                )
-            }
-            if (isCategoryMenuExpanded.value) {
-                DropdownMenu(
-                    expanded = true,
-                    onDismissRequest = { isCategoryMenuExpanded.value = false },
-                    modifier = Modifier.background(MaterialTheme.colors.surface)
-                ) {
-                    categories.forEach { category ->
-                        DropdownMenuItem(onClick = {
-                            categoryState.value = category.name
-                            isCategoryMenuExpanded.value = false
-                        }) {
-                            Text(category.name)
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-        }
 
         errorMessage?.let {
             Text(
                 text = it,
-                color = MaterialTheme.colors.error,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.CenterHorizontally)
+                color = MaterialTheme.colors.error
             )
         }
+
         Button(
             onClick = {
-                if (phoneNumberState.value.length != 9) {
+                errorMessage = null
+
+                if (phoneNumber.length != 9) {
+                    errorMessage = "El número de teléfono debe tener 9 dígitos"
                     return@Button
                 }
 
-                if (!emailRegex.matches(emailState.value)) {
+                if (!emailRegex.matches(email)) {
+                    errorMessage = "El formato del email no es correcto"
                     return@Button
                 }
 
-                val university = University(
-                    id = idState.value?.toLongOrNull(),
-                    name = nameState.value,
-                    address = addressState.value,
-                    phoneNumber = phoneNumberState.value,
-                    email = emailState.value,
-                    hasScholarship = hasScholarshipState.value,
+                val universityToAdd = University(
+                    id = id.toLongOrNull(),
+                    name = name,
+                    address = address,
+                    phoneNumber = phoneNumber,
+                    email = email,
+                    hasScholarship = hasScholarship,
                     location = Location(
-                        id = getLocationIdFromName(locationState.value),
-                        name = locationState.value
+                        id = getLocationIdFromName(location),
+                        name = location
                     ),
                     category = Category(
-                        id = getCategoryIdFromName(categoryState.value),
-                        name = categoryState.value
+                        id = getCategoryIdFromName(category),
+                        name = category
                     )
                 )
 
-                universityViewModel.createUniversity(university)
+                universityViewModel.createUniversity(universityToAdd)
+
                 navController.popBackStack()
             },
-            modifier = Modifier,
-            enabled = true,
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            enabled = true
         ) {
             Text(
                 text = "Agregar",
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.button,
-                color = MaterialTheme.colors.onPrimary
+                style = MaterialTheme.typography.button
             )
         }
     }
 }
+
+@Composable
+fun DropdownTextField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    items: List<String>
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(0) }
+
+    val textWidth = with(LocalDensity.current) {
+        (0.dp).toPx()
+    }
+
+    Column {
+        Text(label)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable(onClick = { expanded = !expanded })
+        ) {
+            Text(
+                text = value,
+                modifier = Modifier.width(IntrinsicSize.Min)
+            )
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+        Box(
+            modifier = Modifier.width(textWidth.dp)
+        ) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEachIndexed { index, item ->
+                    DropdownMenuItem(onClick = {
+                        selectedIndex = index
+                        expanded = false
+                        onValueChange(item)
+                    }) {
+                        Text(text = item)
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 fun getLocationIdFromName(locationName: String): Long {
     val locationsMap = mapOf(
