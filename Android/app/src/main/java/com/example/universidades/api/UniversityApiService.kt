@@ -33,17 +33,12 @@ interface ApiService {
     @GET("/categories")
     suspend fun getAllCategories(): List<Category>
 
-    @GET("/universities/{id}")
-    suspend fun getUniversityById(@Path("id") id: Long): University
-
     @POST("/universities")
     suspend fun createUniversity(@Body university: University): University
 
-    @PUT("/universities/{id}")
-    suspend fun updateUniversity(@Path("id") id: Long, @Body universityDetails: University): University
-
     @DELETE("/universities/{id}")
     suspend fun deleteUniversity(@Path("id") id: Long): Response<Unit>
+
 }
 
 

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.example.universidades.R
 import com.example.universidades.models.University
 import androidx.compose.runtime.LaunchedEffect
-import androidx.navigation.NavHostController
 import com.example.universidades.viewmodels.UniversityViewModel
 import kotlinx.coroutines.launch
 
@@ -30,7 +29,6 @@ fun UniversityListScreen(
     onUniversitySelected: (University) -> Unit,
     onDeleteUniversityClicked: (University) -> Unit,
     onAddUniversityClicked: () -> Unit,
-    navController: NavHostController,
     universityViewModel: UniversityViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()

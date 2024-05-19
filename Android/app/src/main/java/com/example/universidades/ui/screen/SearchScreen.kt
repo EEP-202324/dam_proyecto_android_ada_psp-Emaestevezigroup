@@ -25,32 +25,32 @@ fun SearchScreen(navController: NavHostController, universityViewModel: Universi
         OutlinedTextField(
             value = id,
             onValueChange = { id = it },
-            label = { Text("ID de la Universidad") },
+            label = { Text("University ID") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = category,
             onValueChange = { category = it },
-            label = { Text("Categoría") },
+            label = { Text("Category") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = location,
             onValueChange = { location = it },
-            label = { Text("Localización") },
+            label = { Text("Location") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
                 universityViewModel.searchUniversities(id, category, location)
-                navController.navigate("search_results") // Corregir aquí
+                navController.navigate("search_results")
             },
             modifier = Modifier.align(Alignment.End)
         ) {
-            Text("Buscar")
+            Text("Search")
         }
     }
 }

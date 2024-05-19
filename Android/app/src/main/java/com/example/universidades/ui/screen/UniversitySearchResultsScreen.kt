@@ -31,7 +31,7 @@ fun UniversitySearchResultsScreen(
                 UniversityItem(
                     university = university,
                     onUniversitySelected = onUniversitySelected,
-                    onDeleteUniversityClicked = onDeleteUniversityClicked // Pasar la función onDeleteUniversityClicked al UniversityItem
+                    onDeleteUniversityClicked = onDeleteUniversityClicked
                 )
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
             }

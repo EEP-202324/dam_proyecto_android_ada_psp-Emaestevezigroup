@@ -3,7 +3,6 @@ package com.example.universidades.ui.theme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Typography
 
 
 val Purple80 = Color(0xFFD0BCFF)

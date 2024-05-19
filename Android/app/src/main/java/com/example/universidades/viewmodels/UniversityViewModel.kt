@@ -8,18 +8,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
-import com.example.universidades.api.UniversityApi
+import com.example.universidades.api.ApiService
 import com.example.universidades.models.Category
 import com.example.universidades.models.Location
 import com.example.universidades.models.University
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class UniversityViewModel : ViewModel() {
-
-    var isSearching by mutableStateOf(false)
-        private set
+class UniversityViewModel(private val apiService: ApiService) : ViewModel() {
 
     private val _universityUiState = MutableLiveData<UniversityUiState>()
     val universityUiState: LiveData<UniversityUiState> = _universityUiState
@@ -32,6 +28,7 @@ class UniversityViewModel : ViewModel() {
     private val _categories = MutableLiveData<List<Category>>()
     val categories: LiveData<List<Category>> = _categories
 
+
     init {
         loadUniversities()
         loadLocations()
@@ -42,7 +39,7 @@ class UniversityViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _universityUiState.value = UniversityUiState.Loading
-                val universities = UniversityApi.retrofitService.getAllUniversities()
+                val universities = apiService.getAllUniversities()
                 _universityUiState.value = UniversityUiState.Success(universities)
             } catch (e: Exception) {
                 Log.e("UniversityViewModel", "Error cargando universidades: ${e.message}", e)
@@ -51,10 +48,10 @@ class UniversityViewModel : ViewModel() {
         }
     }
 
-    private fun loadLocations() {
+    fun loadLocations() {
         viewModelScope.launch {
             try {
-                val locations = UniversityApi.retrofitService.getAllLocations()
+                val locations = apiService.getAllLocations()
                 _locations.postValue(locations)
             } catch (e: Exception) {
                 Log.e("UniversityViewModel", "Error cargando ubicaciones: ${e.message}", e)
@@ -62,10 +59,10 @@ class UniversityViewModel : ViewModel() {
         }
     }
 
-    private fun loadCategories() {
+    fun loadCategories() {
         viewModelScope.launch {
             try {
-                val categories = UniversityApi.retrofitService.getAllCategories()
+                val categories = apiService.getAllCategories()
                 _categories.postValue(categories)
             } catch (e: Exception) {
                 Log.e("UniversityViewModel", "Error cargando categorías: ${e.message}", e)
@@ -76,7 +73,7 @@ class UniversityViewModel : ViewModel() {
     fun createUniversity(university: University) {
         viewModelScope.launch {
             try {
-                UniversityApi.retrofitService.createUniversity(university)
+                apiService.createUniversity(university)
                 loadUniversities()
             } catch (e: Exception) {
                 val errorMessage = when (e) {
@@ -97,7 +94,7 @@ class UniversityViewModel : ViewModel() {
     fun deleteUniversity(universityId: Long) {
         viewModelScope.launch {
             try {
-                UniversityApi.retrofitService.deleteUniversity(universityId)
+                apiService.deleteUniversity(universityId)
                 loadUniversities()
             } catch (e: Exception) {
                 _universityUiState.value = UniversityUiState.Error("Error eliminando universidad: ${e.message}")
@@ -115,32 +112,15 @@ class UniversityViewModel : ViewModel() {
         _universityUiState.value = UniversityUiState.Success(filteredUniversities)
     }
 
-    fun updateUniversity(university: University) {
-        viewModelScope.launch {
-            try {
-                val updatedUniversity = UniversityApi.retrofitService.updateUniversity(university.id!!, university)
-            } catch (e: Exception) {
-                // Manejar cualquier error que ocurra durante la actualización, como mostrar un mensaje de error al usuario
-            }
-        }
-    }
 
     fun getLocationByName(name: String): Location? {
-        // Implementa la lógica para buscar la ubicación por su nombre
-        // Si estás utilizando una lista de ubicaciones predefinida, podrías hacer algo como esto:
         val locations: List<Location> = _locations.value ?: return null
         return locations.find { it.name == name }
     }
 
     fun getCategoryByName(name: String): Category? {
-        // Implementa la lógica para buscar la categoría por su nombre
-        // Si estás utilizando una lista de categorías predefinida, podrías hacer algo como esto:
         val categories: List<Category> = _categories.value ?: return null
         return categories.find { it.name == name }
-    }
-
-    fun navigateToUniversityDetailScreen(navController: NavHostController, university: University) {
-        navController.navigate("university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}")
     }
 
 }

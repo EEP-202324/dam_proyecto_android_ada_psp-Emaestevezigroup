@@ -1,48 +1,36 @@
 package com.example.universidades
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.Typography
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.universidades.models.University
+import com.example.universidades.ui.screen.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.universidades.models.University
-import com.example.universidades.ui.screen.AddUniversityScreen
-import com.example.universidades.ui.screen.SearchScreen
-import com.example.universidades.ui.screen.StartScreen
-import com.example.universidades.ui.screen.UniversityDetailScreen
-import com.example.universidades.ui.screen.UniversityListScreen
-import com.example.universidades.ui.screen.UniversitySearchResultsScreen
+import com.example.universidades.api.UniversityApi
 import com.example.universidades.ui.theme.UniversityColors
 import com.example.universidades.viewmodels.UniversityUiState
 import com.example.universidades.viewmodels.UniversityViewModel
+import com.example.universidades.ui.screen.SearchScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +42,8 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
     ) {
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-        val universityViewModel: UniversityViewModel = viewModel()
+        val universityViewModel = UniversityViewModel(UniversityApi.retrofitService)
+
         val universityUiState by universityViewModel.universityUiState.observeAsState()
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -77,31 +66,38 @@ fun UniversityApp(navController: NavHostController = rememberNavController()) {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    if (universityViewModel.isSearching) {
-                        UniversitySearchResultsScreen(
-                            searchResults = (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList(),
-                            onUniversitySelected = { university ->
-                                navController.navigate(
-                                    "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
-                                )
-                            }
-                        ) { university ->
-                            university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
-                        }
-                    } else {
-                        UniversityContent(
-                            universityUiState = universityUiState ?: UniversityUiState.Loading,
-                            navController = navController,
-                            universityViewModel = universityViewModel
-                        )
-                    }
+                    when (currentRoute) {
+                        "university_list" -> {
+                            val searchResultsList: List<University> =
+                                (universityUiState as? UniversityUiState.Success)?.universities ?: emptyList()
 
+                            UniversityListScreen(
+                                universities = searchResultsList,
+                                onUniversitySelected = { university ->
+                                    navController.navigate(
+                                        "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
+                                    )
+                                },
+                                onDeleteUniversityClicked = { university ->
+                                    university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
+                                },
+                                onAddUniversityClicked = { navController.navigate("add_university") },
+                                universityViewModel = universityViewModel
+                            )
+                        }
+                        else -> {
+                            UniversityContent(
+                                universityUiState = universityUiState ?: UniversityUiState.Loading,
+                                navController = navController,
+                                universityViewModel = universityViewModel
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun UniversityContent(
@@ -124,11 +120,10 @@ fun UniversityContent(
                         "university_detail/${university.id}/${university.name}/${university.address}/${university.phoneNumber}/${university.email}/${university.hasScholarship}/${university.location.name}/${university.category.name}"
                     )
                 },
-                onAddUniversityClicked = { navController.navigate("add_university") },
                 onDeleteUniversityClicked = { university ->
                     university.id?.let { it1 -> universityViewModel.deleteUniversity(it1) }
                 },
-                navController = navController,
+                onAddUniversityClicked = { navController.navigate("add_university") },
                 universityViewModel = universityViewModel
             )
         }
@@ -153,7 +148,6 @@ fun UniversityContent(
             val phoneNumber = backStackEntry.arguments?.getString("phoneNumber")
             val email = backStackEntry.arguments?.getString("email")
             val hasScholarship = backStackEntry.arguments?.getBoolean("hasScholarship") ?: false
-            // Obtener Location correspondiente al nombre
             val locationName = backStackEntry.arguments?.getString("location")
             val category = backStackEntry.arguments?.getString("category")
 
@@ -171,19 +165,20 @@ fun UniversityContent(
                         hasScholarship = hasScholarship,
                         location = location,
                         category = categoryName
-                    ),
-                    onUpdateUniversityClicked = { university ->
-                        universityViewModel.updateUniversity(university)
-                    }
+                    )
                 )
             } else {
                 Text(text = "Error: Faltan parámetros de la universidad")
             }
+
+
         }
 
         composable(route = "add_university") {
-            AddUniversityScreen(navController = navController, universityViewModel = universityViewModel)
+            AddUniversityScreen(navController = navController, universityViewModel = universityViewModel, university = null)
         }
+
+
 
         composable(route = "search") {
             SearchScreen(navController = navController, universityViewModel = universityViewModel)
@@ -231,6 +226,3 @@ fun UniversityTopAppBar(
         modifier = modifier
     )
 }
-
-
-

@@ -26,7 +26,7 @@ class ExampleUnitTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    lateinit var viewModel: UniversityViewModel
+    private lateinit var viewModel: UniversityViewModel
 
     @Mock
     private lateinit var observerLocations: Observer<List<Location>>
