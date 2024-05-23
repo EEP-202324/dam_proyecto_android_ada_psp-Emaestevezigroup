@@ -6,7 +6,7 @@
 Esta aplicación permite buscar, agregar y gestionar universidades. Implementada en Android con Jetpack Compose, Retrofit y ViewModel.
 
 ## Vídeo de Presentación
-https://eepmad-my.sharepoint.com/:v:/g/personal/eyassiel-estevez1_eep-igroup_com/EXDmgvgjbh9Dv-V8MIfV0mkBb-7NdgEx1rqznu46GVELyw?e=pxoz3I&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
+https://eepmad-my.sharepoint.com/:v:/g/personal/eyassiel-estevez1_eep-igroup_com/EcI0BFNm0QlHvZ1GVgmSzZwBhRlH5tmd86OdpS3yhlU6rQ?e=8Xvggc&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
 
 ## Puntos Implementados
 - Android: Pantallas de búsqueda y agregar universidad, lista de universidades.
